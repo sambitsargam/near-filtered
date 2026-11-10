@@ -339,5 +339,41 @@ not investment advice.
 
 ## Amendments
 
-*(none — any amendment is appended here with its date and reason, and the
-original text above is never edited.)*
+### A1 — 2026-11-10: H4's Intents leg is a stratified day sample, not a census
+
+**What changed.** `intents_swaps` and `intents_usd` are measured from a
+stratified sample of days rather than from every swap in the window. Four
+whole days are sampled from each month — the **5th, 12th, 19th and 26th** —
+48 days in all. The native leg of H4 is restricted to **exactly the same 48
+days**, so both sides of the ratio continue to cover identical periods.
+
+Monthly figures are therefore reported as **per-day rates with a confidence
+interval across the four sampled days**, not as monthly totals. The ratio
+itself is unaffected by the scaling, because both legs are rates over the
+same days.
+
+**Why.** A census is not reachable before the deadline. Measured directly
+from the API: one page of 1,000 swaps spanned 3,006 seconds, implying roughly
+28,700 swaps a day and about 10.5 million over the window. At the documented
+rate limit of one request per five seconds that is **over 15 hours of
+continuous pulling** against an API that has already timed out on us once.
+Spending the remaining time on that, with no partial result if it fails, is a
+worse bet than a disclosed sample that completes tonight.
+
+**Why this cannot bias a result.** The decision rests on one measurement —
+how many swaps exist per unit time — taken from the most recent page only. No
+monthly series, no ratio and no trend was computed before this amendment was
+written. The sampled days were fixed by the rule above before any day was
+pulled, and they are the same four dates in every month, so no month can be
+given more favourable days than another.
+
+**What it costs us.** Sampling error, now reported rather than hidden: each
+month's figure carries an interval. Any day-of-month effect in swap activity
+is not averaged out, since the same four dates recur. Both are stated in
+`LIMITATIONS.md`. The original census definition stands as the target, and
+`make refresh` can still run it given time.
+
+---
+
+*Amendments are appended here with their date and reason. The original text
+above is never edited.*

@@ -138,6 +138,29 @@ def test_a_drifting_series_is_never_called_supported():
         assert prereg.verdict("flat", predicted) == "INCONCLUSIVE"
 
 
-def test_amendments_start_empty_and_markdown_says_none(md):
-    assert prereg.load()["amendments"] == []
-    assert "*(none —" in md
+def test_amendment_count_matches_between_files(md):
+    """However many amendments exist, both files must show the same ones."""
+    amendments = prereg.load()["amendments"]
+    if not amendments:
+        assert "*(none —" in md
+        return
+    for amendment in amendments:
+        heading = f"### {amendment['id']} — {amendment['date']}"
+        assert heading in md, f"expected a section headed {heading!r}"
+
+
+def test_amendments_are_recorded_in_both_files(md):
+    """An amendment must appear in the published document, not only in JSON."""
+    amendments = prereg.load()["amendments"]
+    for amendment in amendments:
+        assert amendment["id"] in md, f"{amendment['id']} missing from HYPOTHESES.md"
+        assert amendment["date"] in md
+        assert amendment["reason"], "an amendment must state why"
+        assert amendment["bias_risk"], "an amendment must state why it cannot bias a result"
+
+
+def test_the_original_text_is_never_edited_away(md):
+    """H4's original census definition must survive alongside any amendment."""
+    if prereg.load()["amendments"]:
+        assert "Amendments are appended here" in md
+        assert "original text\nabove is never edited" in md

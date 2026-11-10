@@ -105,7 +105,19 @@
       "disagreement_rule": "if the count and value forms disagree in direction, report both and treat H4 as INCONCLUSIVE",
       "why_count_is_headline": "ft_events has no decimals column, so the native USD leg needs outside metadata for every contract while the Intents leg needs none; the headline must not rest on the weaker leg",
       "why_economic_filter_in_denominator": "a one-day feasibility probe found NEP-141 transfer counts dominated by two reward-token applications, so an unfiltered denominator would track a reward schedule rather than settlement",
-      "unique_swappers_caveat": "the senders field is sometimes an empty array; the share of swaps with an identifiable sender is reported alongside the count"
+      "unique_swappers_caveat": "the senders field is sometimes an empty array; the share of swaps with an identifiable sender is reported alongside the count",
+      "sampling": {
+        "amended_by": "A1",
+        "days_per_month": [
+          5,
+          12,
+          19,
+          26
+        ],
+        "total_days": 48,
+        "both_legs_same_days": true,
+        "reported_as": "per-day rate with a confidence interval across the four sampled days"
+      }
     },
     {
       "id": "H5",
@@ -139,7 +151,17 @@
     "constraint": "indicators must be quantities this pipeline already computes",
     "no_price_targets": true
   },
-  "amendments": [],
+  "amendments": [
+    {
+      "id": "A1",
+      "date": "2026-11-10",
+      "hypothesis": "H4",
+      "change": "Intents and native legs measured from a stratified sample of 4 days per month (the 5th, 12th, 19th, 26th), 48 days total, reported as per-day rates with a confidence interval",
+      "reason": "a census is ~10.5M swaps and over 15 hours at the documented 1-request-per-5-seconds rate limit, which does not fit before the deadline",
+      "bias_risk": "rests only on swaps-per-unit-time from the most recent page; no monthly series, ratio or trend was computed first, and the sampled dates are identical in every month",
+      "cost": "sampling error, reported as an interval; any day-of-month effect is not averaged out"
+    }
+  ],
   "pre_freeze_probes": [
     {
       "sql": "sql/meta_partitions.sql",
