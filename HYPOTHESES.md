@@ -373,6 +373,68 @@ is not averaged out, since the same four dates recur. Both are stated in
 `LIMITATIONS.md`. The original census definition stands as the target, and
 `make refresh` can still run it given time.
 
+### A2 — 2026-11-10: the balance criterion reads account_changes, not ft_balances_daily
+
+**What changed.** The `b` threshold in §0.2 is still "held >= b NEAR (liquid
++ staked) at window end". Its **source** changes from `ft_balances_daily` to
+`account_changes`, taking each account's balance at its last recorded change
+inside the window.
+
+**Why.** `ft_balances_daily` does not cover the accounts that transact. Over
+the 30-day window ending 2026-10-31 there were **816,171 distinct signers**,
+while the balance table held **30,228 accounts** for that day and matched
+**3,064 signers — 0.38%**
+(`sql/meta_balance_coverage.sql`). The join was therefore not applying a
+balance threshold at all; it was testing membership of a small table. The
+symptom was unmistakable once looked at: raising `b` from 0 to 0.1 cut the
+count from 19,855 to 568, a 97% fall that no real balance floor produces.
+
+`account_changes` records a balance on every account change, and every
+transaction burns gas, so any account that transacted in the window appears
+in it. On the probe date it held 110,300 distinct accounts against the
+balance table's 30,228.
+
+**Unit difference, verified not assumed.** `account_changes` balances are
+**yoctoNEAR** (max ~1e31 on the probe date,
+`sql/meta_account_changes_scale.sql`), whereas `ft_balances_daily` was
+already in NEAR. The new query divides by 1e24; the old one must not.
+
+**Why this cannot bias a result.** The fault was found by inspecting the
+threshold grid for internal consistency — a 97% drop between adjacent
+thresholds — not by comparing a trend against a prediction. The correction
+restores the criterion the pre-registration already specified; it does not
+redefine it, and the thresholds themselves are unchanged.
+
+**What it costs us.** Balance is measured at the account's last change within
+the window rather than exactly at midnight on the final day. For an account
+active in the window the two are close, and for an inactive one no balance is
+observable at all. Stated in `LIMITATIONS.md`. The query also scans about
+15 GiB per month instead of 1 GiB, which is still inside the per-query cap.
+
+---
+
+### A3 — 2026-11-10: H3 excludes the left-censored first cohort
+
+**What changed.** The cohort beginning the window (2025-11) is excluded from
+H3's headline trend. Both figures are published.
+
+**Why.** A cohort is defined by an account's *first* economic month, but the
+window has no history before it starts, so every account economic in
+2025-11 appears to be new that month when most were not. The artefact is
+visible in the sizes: 50,158 accounts in 2025-11 against 16,915 the
+following month, three times larger. Left in, that cohort is both
+artificially large and artificially loyal, which biases H3 toward "newer
+cohorts retain worse" — the direction of rejection.
+
+**Why this cannot bias a result.** It does not change the verdict. With the
+censored cohort: slope -1.360 pp per cohort, 95% CI [-3.073, +0.352],
+**INCONCLUSIVE**. Without it: slope -0.357, 95% CI [-1.731, +1.017],
+**INCONCLUSIVE**. Both are reported, and the exclusion makes the result
+*less* favourable to a rejection narrative, not more.
+
+**What it costs us.** One fewer cohort, so eight observations rather than
+nine, and a correspondingly wider interval.
+
 ---
 
 *Amendments are appended here with their date and reason. The original text

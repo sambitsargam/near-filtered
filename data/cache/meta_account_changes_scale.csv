@@ -1,0 +1,2 @@
+rows_in_partition,distinct_accounts,median_nonstaked,max_nonstaked,log10_max_nonstaked,log10_max_staked
+4090859,110279,9.54488381780558e+27,3.4861893988290234e+31,31.542350977906477,31.521889054920408

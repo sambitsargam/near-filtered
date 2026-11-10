@@ -60,11 +60,11 @@ verify: test
 	@$(MAKE) --no-print-directory rebuild
 	@echo ""
 	@echo "=== hypothesis summary ==========================================="
-	@echo "not yet wired (lands with results/metrics.json)"
+	@$(RUN) python scripts/scoreboard.py
 
+# Needs no network and no keys: everything comes from data/cache/.
 rebuild:
-	@echo "rebuild: not yet wired — the pipeline stages land Nov 11-12."
-	@echo "         When it is wired this target needs no network and no keys."
+	$(RUN) python -m near_filtered.metrics
 
 # --- live data -----------------------------------------------------------
 inventory:

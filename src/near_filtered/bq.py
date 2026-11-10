@@ -160,7 +160,11 @@ class BigQueryRunner:
             maximum_bytes_billed=self.max_bytes,
         )
         job = self.client.query(sql, job_config=job_config)
-        df = job.result().to_dataframe()
+        # Force the REST path. The faster BigQuery Storage gRPC endpoint is
+        # not reachable from every environment (bigquerystorage.googleapis.com
+        # fails DNS resolution here), and a result that arrives slowly beats a
+        # job that dies after the scan has already been billed.
+        df = job.result().to_dataframe(create_bqstorage_client=False)
 
         billed = int(job.total_bytes_billed or 0)
         record_cost(name, int(job.total_bytes_processed or 0), billed)

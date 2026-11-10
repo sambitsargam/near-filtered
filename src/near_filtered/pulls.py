@@ -151,3 +151,57 @@ def h1_headline(grid: pd.DataFrame) -> pd.DataFrame:
             f"the grid in SQL and the pre-registration have diverged"
         )
     return out
+
+
+def h2_concentration(
+    runner: bq.BigQueryRunner, window: Window, dry_run_only: bool = False
+) -> pd.DataFrame:
+    """H2: top-10 receiver share and HHI, over economic accounts only.
+
+    Recomputes the economic filter inline rather than reading it from a
+    staged table, because the linked dataset forbids destination tables.
+    That makes this the second expensive scan of account_changes; there is
+    no cheaper route that keeps the pre-registered filter intact.
+    """
+    from . import config
+
+    sql = bq.load_sql("h2_concentration")
+    d, c, b = prereg.defaults()
+    frames, total = [], 0
+
+    print(f"H2: concentration over {len(month_windows(window))} monthly windows")
+    for month, start, end in month_windows(window):
+        params = {
+            "window_start": start,
+            "window_end": end,
+            "min_active_days": d,
+            "min_distinct_receivers": c,
+            "min_balance_near": b,
+        }
+        name = f"h2_concentration_{month}"
+        if dry_run_only:
+            cost = runner.dry_run(sql, params, name)
+            total += cost.bytes_processed
+            print(f"  {month}  {cost.describe()}")
+            continue
+
+        path = config.RAW_DIR / f"h2_{month}.parquet"
+        if path.exists():
+            frame = pd.read_parquet(path)
+            print(f"  {month}  cached")
+        else:
+            frame = runner.run(sql, params, name=name)
+            frame.insert(0, "month", month)
+            tmp = path.with_suffix(".parquet.tmp")
+            frame.to_parquet(tmp, index=False)
+            tmp.rename(path)
+            print(f"  {month}  top10={frame.top10_share.iloc[0]:.4f} hhi={frame.hhi.iloc[0]:.4f}")
+        frames.append(frame)
+
+    if dry_run_only:
+        print(f"\n  total {config.human_bytes(total)} (~${config.bytes_to_usd(total):,.2f})")
+        return pd.DataFrame()
+
+    out = pd.concat(frames, ignore_index=True)
+    bq.save_cache("h2_concentration", out)
+    return out

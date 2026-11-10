@@ -31,7 +31,8 @@
       ]
     },
     "window_days": 30,
-    "missing_balance_treated_as": 0.0
+    "missing_balance_treated_as": 0.0,
+    "balance_source": "account_changes (amended by A2); yoctoNEAR, divided by 1e24"
   },
   "verdict_rule": {
     "method": "ordinary least squares slope on the monthly series",
@@ -83,7 +84,8 @@
       "rejected_if": "95% CI of the slope across cohort months lies entirely below zero",
       "extra_bars": [],
       "unobservable_reported_as": "NaN",
-      "sensitivity_tested": true
+      "sensitivity_tested": true,
+      "left_censoring": "the first cohort of the window is excluded from the headline trend (amendment A3)"
     },
     {
       "id": "H4",
@@ -160,6 +162,24 @@
       "reason": "a census is ~10.5M swaps and over 15 hours at the documented 1-request-per-5-seconds rate limit, which does not fit before the deadline",
       "bias_risk": "rests only on swaps-per-unit-time from the most recent page; no monthly series, ratio or trend was computed first, and the sampled dates are identical in every month",
       "cost": "sampling error, reported as an interval; any day-of-month effect is not averaged out"
+    },
+    {
+      "id": "A2",
+      "date": "2026-11-10",
+      "hypothesis": "H1",
+      "change": "the b threshold's balance source moves from ft_balances_daily to account_changes, taking each account's balance at its last change inside the window; balances there are yoctoNEAR and are divided by 1e24",
+      "reason": "ft_balances_daily matched 3,064 of 816,171 signers (0.38%), so the join tested table membership rather than a balance; raising b from 0 to 0.1 cut the count from 19,855 to 568",
+      "bias_risk": "found by checking the threshold grid for internal consistency, not by comparing any trend against a prediction; restores the criterion already specified and leaves the thresholds unchanged",
+      "cost": "balance is measured at the account's last change in the window rather than exactly at window end; the query scans ~15 GiB per month instead of ~1 GiB"
+    },
+    {
+      "id": "A3",
+      "date": "2026-11-10",
+      "hypothesis": "H3",
+      "change": "the first cohort in the window (2025-11) is excluded from the headline trend; both figures are published",
+      "reason": "the window has no history before it starts, so every account economic in its first month appears new; that cohort is 3x the next one's size and is both artificially large and artificially loyal",
+      "bias_risk": "the verdict is INCONCLUSIVE with or without it, and the exclusion works against a rejection narrative rather than for it",
+      "cost": "eight cohort observations instead of nine, and a wider interval"
     }
   ],
   "pre_freeze_probes": [
