@@ -68,20 +68,29 @@ def h1_accounts(
             total += cost.bytes_processed
             print(f"  {month}  {cost.describe()}")
             continue
-        frame = runner.run(sql, params, name=name)
-        frame.insert(0, "month", month)
+
+        # Each month is written before the next query starts, so an
+        # interruption costs one month rather than the whole run. Without
+        # this, a drop at month eleven re-bills every earlier scan.
+        path = config.RAW_DIR / f"h1_accounts_{month}.parquet"
+        if path.exists():
+            frame = pd.read_parquet(path)
+            print(f"  {month}  {len(frame):,} accounts (cached, not re-queried)")
+        else:
+            frame = runner.run(sql, params, name=name)
+            frame.insert(0, "month", month)
+            tmp = path.with_suffix(".parquet.tmp")
+            frame.to_parquet(tmp, index=False)
+            tmp.rename(path)  # atomic: a half-written month is never read back
+            print(f"  {month}  {len(frame):,} accounts above the loosest cell")
         frames.append(frame)
-        print(f"  {month}  {len(frame):,} accounts above the loosest cell")
 
     if dry_run_only:
         print(f"\n  total {config.human_bytes(total)} (~${config.bytes_to_usd(total):,.2f})")
         return pd.DataFrame()
 
     out = pd.concat(frames, ignore_index=True)
-    # Gitignored: this is account-level, not an aggregate, and the committed
-    # cache holds only what it reduces to.
-    out.to_parquet(config.RAW_DIR / "h1_accounts.parquet", index=False)
-    print(f"  wrote {len(out):,} account-months to data/cache/raw_full/")
+    print(f"  {len(out):,} account-months in data/cache/raw_full/ (gitignored)")
     return out
 
 
