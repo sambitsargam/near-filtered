@@ -42,33 +42,79 @@ class RateLimiter:
         self._last = time.monotonic()
 
 
+# NEP-245 multi-tokens key their chain by numeric EVM chain id. Only ids seen
+# in real traffic are named; anything else is reported as "eip155:<id>" rather
+# than guessed, so an unmapped chain is visible instead of silently wrong.
+_EVM_CHAIN_IDS = {
+    "1": "eth",
+    "10": "optimism",
+    "56": "bsc",
+    "137": "polygon",
+    "196": "xlayer",
+    "8453": "base",
+    "42161": "arb",
+}
+
+
 def parse_chain(asset_id: str | None) -> str:
-    """Extract the chain from an Intents asset id.
+    """Which chain an Intents asset originates from, per its asset id.
 
-    Documented form is `nep141:<chain>-<address>.omft.near`, e.g.
-    `nep141:eth-0xa0b8....omft.near`. Native assets of a bridged chain carry
-    no address at all — `nep141:btc.omft.near` is bridged Bitcoin — so the
-    `.omft.near` suffix, not the presence of a hyphen, is what marks an asset
-    as foreign. Getting this backwards would file bridged BTC as NEAR-native
-    and inflate the native side of the settlement share, so it is tested.
+    Four namespaces appear in real traffic, and all four are handled here
+    because 14% of a sampled day fell outside the first one:
 
-    NEAR's own assets appear as plain NEAR account ids such as
-    `nep141:wrap.near`. Anything we cannot parse is reported as "unknown"
-    rather than guessed, so an unparsed asset shows up in the output instead
-    of being quietly absorbed into one side of the ratio.
+    `nep141:<chain>-<address>.omft.near`
+        A bridged asset. The `.omft.near` suffix, not the presence of a
+        hyphen, is what marks it foreign: `nep141:btc.omft.near` is bridged
+        Bitcoin and carries no address. Reading that as NEAR would move real
+        cross-chain volume onto the native side of the settlement share.
+
+    `nep141:<near account>`
+        Anything else under nep141 is a NEAR-native token, whatever its
+        suffix: `wrap.near`, `token.sweat`, and bare 64-hex implicit account
+        ids all qualify. Note that Rainbow-Bridge style tokens such as
+        `*.factory.bridge.near` are NEAR-side representations of foreign
+        assets and are counted as NEAR here, because the asset id encodes no
+        origin chain. That limitation is recorded in LIMITATIONS.md.
+
+    `1cs_v1:<chain>:<kind>:<id>`
+        Chain is the second segment, e.g. `1cs_v1:btc:native:coin`.
+
+    `nep245:<contract>:<evm chain id>_<token>`
+        A multi-token; the chain is the numeric id before the underscore.
+
+    Anything unrecognised returns "unknown" rather than a guess, so an
+    unparsed asset shows up in the output instead of being absorbed into one
+    side of a ratio.
     """
     if not asset_id or not isinstance(asset_id, str):
         return "unknown"
-    body = asset_id.split(":", 1)[1] if ":" in asset_id else asset_id
 
-    suffix = ".omft.near"
-    if body.endswith(suffix):
-        label = body[: -len(suffix)]
-        chain = label.split("-", 1)[0].strip().lower()
+    standard, _, body = asset_id.partition(":")
+    if not body:
+        return "unknown"
+    standard = standard.lower()
+
+    if standard == "1cs_v1":
+        chain = body.split(":", 1)[0].strip().lower()
         return chain or "unknown"
 
-    if body.endswith((".near", ".testnet")):
+    if standard == "nep245":
+        # <contract>:<chainid>_<token>
+        _, _, tail = body.rpartition(":")
+        chain_id = tail.split("_", 1)[0].strip()
+        if chain_id.isdigit():
+            return _EVM_CHAIN_IDS.get(chain_id, f"eip155:{chain_id}")
+        return "unknown"
+
+    if standard == "nep141":
+        suffix = ".omft.near"
+        if body.endswith(suffix):
+            label = body[: -len(suffix)]
+            chain = label.split("-", 1)[0].strip().lower()
+            return chain or "unknown"
+        # Every other nep141 asset is a token living natively on NEAR.
         return "near"
+
     return "unknown"
 
 

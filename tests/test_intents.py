@@ -53,3 +53,41 @@ def test_rate_limiter_does_not_delay_the_first_call():
     start = time.monotonic()
     limiter.wait()
     assert time.monotonic() - start < 0.1
+
+
+# --- asset id namespaces seen in real traffic ----------------------------
+# Every example below was taken from a real sampled day. A first version of
+# the parser handled only the first namespace and left 14% of that day's
+# swaps as "unknown".
+
+
+def test_1cs_v1_assets():
+    assert parse_chain("1cs_v1:btc:native:coin") == "btc"
+    assert parse_chain("1cs_v1:sol:spl:A7bdiYdS5GjqGFtxf17ppRHtDKPkkRqbKtR27dxvQXaS") == "sol"
+
+
+def test_nep141_near_native_tokens_without_a_near_suffix():
+    # token.sweat is a NEAR account under the .sweat top-level account, and
+    # a bare 64-hex string is an implicit NEAR account. Both are NEAR-native.
+    assert parse_chain("nep141:token.sweat") == "near"
+    assert (
+        parse_chain("nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1")
+        == "near"
+    )
+    assert parse_chain("nep141:usdt.tether-token.near") == "near"
+
+
+def test_nep245_multi_tokens_use_numeric_chain_ids():
+    assert parse_chain("nep245:v2_1.omni.hot.tg:56_2CMMyVTGZkeyNZTSvS5sarzfir6g") == "bsc"
+    assert parse_chain("nep245:v2_1.omni.hot.tg:137_3hpYoaLtt8MP1Z2GH1U473DMRKgr") == "polygon"
+    assert parse_chain("nep245:v2_1.omni.hot.tg:10_A2ewyUyDp6qsue1jqZsGypkCxRJ") == "optimism"
+    assert parse_chain("nep245:v2_1.omni.hot.tg:196_11111111111111111111") == "xlayer"
+
+
+def test_an_unmapped_evm_chain_id_is_surfaced_not_guessed():
+    assert parse_chain("nep245:v2_1.omni.hot.tg:1117_3tsdfyziyc7EJbP2") == "eip155:1117"
+
+
+def test_unrecognised_namespaces_are_still_unknown():
+    assert parse_chain("someother:thing") == "unknown"
+    assert parse_chain("nep141:") == "unknown"

@@ -44,7 +44,9 @@ DEFAULT_MAX_BYTES_BILLED = 50 * 1024**3  # 50 GiB
 # Base URL and the 1-request-per-5-seconds partner rate limit are documented;
 # see SOURCES.md. We add headroom because a 429 costs us more than a wait.
 INTENTS_BASE_URL = "https://explorer.near-intents.org/api/v0"
-INTENTS_MIN_INTERVAL_S = 5.2
+# 5.2s still drew occasional 429s in practice, and each one costs a 10s
+# backoff, so a slightly wider gap is faster overall.
+INTENTS_MIN_INTERVAL_S = 5.6
 INTENTS_PAGE_SIZE = 1000  # documented maximum for numberOfTransactions
 # The explorer can be slow on wide or filtered queries; a long pull must
 # tolerate that rather than abort on one slow response.
