@@ -183,6 +183,23 @@ def _to_params(bigquery, params: dict):
     """
     out = []
     for key, value in params.items():
+        if isinstance(value, (list, tuple)):
+            # Array parameters let a query filter against a set we already
+            # hold locally, instead of recomputing it from a second scan of
+            # the public dataset.
+            sample = next((v for v in value if v is not None), "")
+            if isinstance(sample, dt.date):
+                element_type = "DATE"
+            elif isinstance(sample, bool):
+                element_type = "BOOL"
+            elif isinstance(sample, int):
+                element_type = "INT64"
+            elif isinstance(sample, float):
+                element_type = "FLOAT64"
+            else:
+                element_type = "STRING"
+            out.append(bigquery.ArrayQueryParameter(key, element_type, list(value)))
+            continue
         if isinstance(value, bool):
             type_ = "BOOL"
         elif isinstance(value, int):

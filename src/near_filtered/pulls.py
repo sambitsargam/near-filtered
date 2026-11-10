@@ -205,3 +205,60 @@ def h2_concentration(
     out = pd.concat(frames, ignore_index=True)
     bq.save_cache("h2_concentration", out)
     return out
+
+
+def h4_native_leg(runner: bq.BigQueryRunner, window: Window) -> pd.DataFrame:
+    """H4's native leg on the sampled days, filtered to economic accounts.
+
+    The economic set is passed as an array parameter from the per-account
+    results already on disk. Recomputing it in SQL would mean a second scan
+    of account_changes at roughly 50 GiB a month to rediscover a set we
+    already hold; this way the whole leg costs about 2 GiB.
+    """
+    from . import config
+    from . import transforms as T
+    from .intents_pull import sampled_days
+
+    accounts = pd.read_parquet(config.RAW_DIR / "h1_accounts.parquet")
+    d, c, b = prereg.defaults()
+    economic = accounts[T.is_economic(accounts, d, c, b)]
+
+    by_month: dict[str, list] = {}
+    for day in sampled_days(window):
+        by_month.setdefault(day.strftime("%Y-%m"), []).append(day)
+
+    sql = bq.load_sql("h4_native_leg")
+    rows = []
+    print(f"H4 native leg over {len(by_month)} months of sampled days")
+    for month, days in sorted(by_month.items()):
+        ids = economic[economic.month == month].account_id.tolist()
+        if not ids:
+            print(f"  {month}  no economic accounts; skipped")
+            continue
+        frame = runner.run(
+            sql,
+            {"days": days, "economic_accounts": ids},
+            name=f"h4_native_{month}",
+        )
+        record = frame.iloc[0].to_dict()
+        record["month"] = month
+        record["days_sampled"] = len(days)
+        record["economic_accounts"] = len(ids)
+        # Stored as a readable string: the top contracts are context for a
+        # reader, not a series anything is computed from.
+        # APPROX_TOP_COUNT returns an array of structs; pandas hands it back
+        # as a numpy array, so it must be tested for None rather than
+        # truth-tested.
+        top = record.get("top_contracts")
+        record["top_contracts"] = (
+            "|".join(f"{t['value']}:{t['count']}" for t in top) if top is not None else ""
+        )
+        rows.append(record)
+        print(
+            f"  {month}  {int(record['native_transfers']):>10,} transfers "
+            f"from {len(ids):,} economic accounts"
+        )
+
+    out = pd.DataFrame(rows)
+    bq.save_cache("h4_native_leg", out)
+    return out
