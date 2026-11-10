@@ -6,7 +6,7 @@ names a file you can open or a command you can run.
 
 ## Prerequisites
 
-- `make` and [`uv`](https://docs.astral.sh/uv/) (or any Python 3.11+; `uv`
+- `make` and [`uv`](https://docs.astral.sh/uv/) (or any `Python 3.11+`; `uv`
   pins the exact lockfile)
 - **No Google Cloud account, no API keys, no network** for verification
 

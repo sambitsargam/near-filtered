@@ -209,7 +209,7 @@ def check_file(path: Path, allowed: set[str]) -> list[Finding]:
 
 def documents_to_check() -> list[Path]:
     paths: list[Path] = []
-    for name in ("THESIS.md", "README.md", "LIMITATIONS.md", "METHODOLOGY.md"):
+    for name in ("THESIS.md", "README.md", "LIMITATIONS.md", "METHODOLOGY.md", "JUDGES.md"):
         candidate = config.ROOT / name
         if candidate.exists():
             paths.append(candidate)
