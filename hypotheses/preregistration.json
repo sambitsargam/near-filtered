@@ -1,0 +1,165 @@
+{
+  "frozen": true,
+  "note": "Machine-readable copy of HYPOTHESES.md. The markdown is the published statement; this file is what the code reads. tests/test_preregistration.py fails if they disagree.",
+  "window": {
+    "months": 12,
+    "anchor": "newest partition shared by every table we query",
+    "freshness_tolerance_days": 7,
+    "intents_clipped_to_window": true
+  },
+  "bot_filter": {
+    "defaults": {
+      "min_active_days": 4,
+      "min_distinct_receivers": 2,
+      "min_balance_near": 0.1
+    },
+    "grid": {
+      "min_active_days": [
+        2,
+        4,
+        8
+      ],
+      "min_distinct_receivers": [
+        1,
+        2,
+        3
+      ],
+      "min_balance_near": [
+        0.0,
+        0.1,
+        1.0
+      ]
+    },
+    "window_days": 30,
+    "missing_balance_treated_as": 0.0
+  },
+  "verdict_rule": {
+    "method": "ordinary least squares slope on the monthly series",
+    "confidence": 0.95,
+    "supported": "95% CI entirely in the predicted direction, and every extra bar met",
+    "rejected": "95% CI entirely in the opposite direction",
+    "inconclusive": "95% CI contains zero"
+  },
+  "robustness_labels": {
+    "robust": "every grid cell agrees with the prediction",
+    "depends": "some cells agree, others are flat or disagree",
+    "reversed": "no cell agrees and at least one points the other way"
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "name": "Real usage",
+      "metric": "count of economic accounts per 30-day window, monthly, at default thresholds",
+      "series": "economic_accounts_monthly",
+      "predicted_direction": "up_or_flat",
+      "rejected_if": "95% CI of the slope lies entirely below zero at default thresholds",
+      "extra_bars": [],
+      "sensitivity_tested": true
+    },
+    {
+      "id": "H2",
+      "name": "Concentration",
+      "metric": "top-10 receiver share of economic transactions, and HHI on the 0-1 scale, monthly",
+      "series": [
+        "top10_share_monthly",
+        "hhi_monthly"
+      ],
+      "predicted_direction": "down",
+      "rejected_if": "95% CI of either slope lies entirely above zero",
+      "extra_bars": [],
+      "sensitivity_tested": true
+    },
+    {
+      "id": "H3",
+      "name": "Retention",
+      "metric": "share of each monthly cohort still economic at exactly +3 months, point-in-time",
+      "series": "cohort_retention_m3",
+      "offsets_months": [
+        1,
+        3,
+        6
+      ],
+      "predicted_direction": "up_or_flat",
+      "rejected_if": "95% CI of the slope across cohort months lies entirely below zero",
+      "extra_bars": [],
+      "unobservable_reported_as": "NaN",
+      "sensitivity_tested": true
+    },
+    {
+      "id": "H4",
+      "name": "Cross-chain shift",
+      "metric": "cross-chain settlement share, monthly; count form is the headline, value form secondary",
+      "series": [
+        "settlement_share_count_monthly",
+        "settlement_share_value_monthly"
+      ],
+      "predicted_direction": "up",
+      "rejected_if": "95% CI of the slope lies entirely below zero",
+      "extra_bars": [],
+      "lower_bound": "Intents Explorer API covers 1Click swaps only; both legs are lower bounds on their own side",
+      "sensitivity_tested": false,
+      "forms": {
+        "count_headline": "intents_swaps / (intents_swaps + native_economic_transfers), pricing-free; the native leg is filtered by the same economic-account definition as H1",
+        "value_secondary": "intents_usd / (intents_usd + native_usd); intents_usd comes from the API's amountInUsd, native_usd covers only contracts priceable by an a priori rule, with coverage reported as a percentage"
+      },
+      "disagreement_rule": "if the count and value forms disagree in direction, report both and treat H4 as INCONCLUSIVE",
+      "why_count_is_headline": "ft_events has no decimals column, so the native USD leg needs outside metadata for every contract while the Intents leg needs none; the headline must not rest on the weaker leg",
+      "why_economic_filter_in_denominator": "a one-day feasibility probe found NEP-141 transfer counts dominated by two reward-token applications, so an unfiltered denominator would track a reward schedule rather than settlement",
+      "unique_swappers_caveat": "the senders field is sometimes an empty array; the share of swaps with an identifiable sender is reported alongside the count"
+    },
+    {
+      "id": "H5",
+      "name": "Value accrual",
+      "parts": {
+        "H5a": {
+          "metric": "monthly fees burned vs new issuance, and net issuance = issuance - burned",
+          "series": "burn_over_issuance_monthly",
+          "predicted_direction": "up",
+          "extra_bars": [
+            {
+              "name": "materiality",
+              "test": "burned fees >= 10% of gross issuance in the window's final month",
+              "threshold": 0.1
+            }
+          ],
+          "rejected_if": "the materiality bar fails AND the slope's 95% CI does not lie above zero"
+        },
+        "H5b": {
+          "metric": "documentary: does any portion of NEAR Intents fees accrue to NEAR token holders",
+          "answered_from": "primary sources only, cited in SOURCES.md",
+          "pre_committed_reading": "if primary documentation names no mechanism by which Intents fees reach NEAR holders, that counts as evidence AGAINST the claim's second clause and is reported as such"
+        }
+      },
+      "sensitivity_tested": false
+    }
+  ],
+  "no_new_hypotheses": "These five are the only hypotheses tested. Anything found later appears under 'Exploratory (not pre-registered)' and is never counted as evidence for or against the claim.",
+  "bull_base_bear": {
+    "written": "after the verdicts",
+    "constraint": "indicators must be quantities this pipeline already computes",
+    "no_price_targets": true
+  },
+  "amendments": [],
+  "pre_freeze_probes": [
+    {
+      "sql": "sql/meta_partitions.sql",
+      "question": "dataset freshness",
+      "bias_risk": "metadata only"
+    },
+    {
+      "sql": "sql/meta_balance_scale.sql",
+      "question": "balance units",
+      "bias_risk": "one day, a unit not an outcome"
+    },
+    {
+      "sql": "sql/meta_tx_status_values.sql",
+      "question": "status vocabulary",
+      "bias_risk": "one day, a vocabulary not an outcome"
+    },
+    {
+      "sql": "sql/meta_ft_contract_coverage.sql",
+      "question": "which contracts carry NEP-141 transfers",
+      "bias_risk": "one day, no time series, so no trend is observable"
+    }
+  ]
+}
