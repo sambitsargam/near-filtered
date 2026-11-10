@@ -144,7 +144,7 @@ class IntentsClient:
     def _get(
         self,
         params: dict,
-        max_retries: int = 6,
+        max_retries: int = 9,
         timeout: float = config.INTENTS_TIMEOUT_S,
     ) -> list[dict]:
         cached = self._cache_file(params)

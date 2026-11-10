@@ -244,18 +244,114 @@ def build_h5() -> dict:
 
 
 def build_h4() -> dict:
+    """Cross-chain settlement share: the count form is the headline.
+
+    Both legs are measured on the same 48 sampled days (amendment A1), so
+    the ratio compares like with like even though each leg is a sample.
+    """
+    name = prereg.hypothesis("H4")["name"]
     try:
         daily = bq.load_cached("intents_daily")
+        native = bq.load_cached("h4_native_leg")
     except FileNotFoundError:
-        return {"id": "H4", "name": "Cross-chain shift", "verdict": MISSING}
+        return {"id": "H4", "name": name, "verdict": MISSING}
+
     from .intents_pull import monthly_rates
 
-    monthly = monthly_rates(daily)
+    intents_month = (
+        daily.groupby("month")
+        .agg(
+            days_sampled=("day", "count"),
+            intents_swaps=("swaps_success", "sum"),
+            intents_usd=("usd_volume_success", "sum"),
+            unique_senders=("unique_senders", "sum"),
+            sender_coverage=("sender_coverage", "mean"),
+        )
+        .reset_index()
+    )
+
+    merged = intents_month.merge(
+        native[["month", "native_transfers", "bridged_transfers", "distinct_accounts"]],
+        on="month",
+        how="inner",
+    ).sort_values("month")
+
+    # A month is only comparable when both legs sampled the same four days.
+    complete = merged[merged.days_sampled == 4]
+    if len(complete) < 3:
+        return {
+            "id": "H4",
+            "name": name,
+            "verdict": MISSING,
+            "months_complete": len(complete),
+            "months_needed": 3,
+        }
+
+    complete = complete.assign(
+        settlement_share_count=[
+            T.settlement_share(i, n)
+            for i, n in zip(complete.intents_swaps, complete.native_transfers)
+        ]
+    )
+    trend = _trend_block(complete.settlement_share_count.tolist())
+    predicted = prereg.hypothesis("H4")["predicted_direction"]
+    verdict = prereg.verdict(trend["direction"], predicted)
+
     return {
         "id": "H4",
-        "name": prereg.hypothesis("H4")["name"],
-        "verdict": MISSING,  # needs the native leg; filled once H4 is complete
-        "intents_monthly": json.loads(monthly.to_json(orient="records")),
+        "name": name,
+        "predicted_direction": predicted,
+        "sampling": prereg.hypothesis("H4")["sampling"],
+        "months_complete": len(complete),
+        "months_total": len(merged),
+        "series": {
+            "settlement_share_count": _series(complete, "month", "settlement_share_count"),
+            "intents_swaps": _series(complete, "month", "intents_swaps"),
+            "native_transfers": _series(complete, "month", "native_transfers"),
+            "intents_usd": _series(complete, "month", "intents_usd"),
+            "bridged_transfers": _series(complete, "month", "bridged_transfers"),
+        },
+        "trend": trend,
+        "verdict": verdict,
+        # A ratio can rise because its numerator grew or because its
+        # denominator collapsed, and those are different findings. The
+        # pre-registration asks for both growth rates next to the share, so
+        # a reader is never left to assume the flattering one.
+        "decomposition": {
+            "intents_swaps_first": _clean(float(complete.intents_swaps.iloc[0])),
+            "intents_swaps_last": _clean(float(complete.intents_swaps.iloc[-1])),
+            "intents_growth_pct": _clean(
+                (complete.intents_swaps.iloc[-1] / complete.intents_swaps.iloc[0] - 1) * 100
+            ),
+            "native_transfers_first": _clean(float(complete.native_transfers.iloc[0])),
+            "native_transfers_last": _clean(float(complete.native_transfers.iloc[-1])),
+            "native_growth_pct": _clean(
+                (complete.native_transfers.iloc[-1] / complete.native_transfers.iloc[0] - 1) * 100
+            ),
+            "driven_by": (
+                "numerator"
+                if complete.intents_swaps.iloc[-1] > complete.intents_swaps.iloc[0]
+                and complete.native_transfers.iloc[-1] >= complete.native_transfers.iloc[0]
+                else "denominator"
+                if complete.native_transfers.iloc[-1] < complete.native_transfers.iloc[0]
+                and complete.intents_swaps.iloc[-1] <= complete.intents_swaps.iloc[0]
+                else "both"
+            ),
+        },
+        "sender_coverage_mean": _clean(float(complete.sender_coverage.mean())),
+        # The value form needs token decimals, which the dataset does not
+        # carry. Reported as uncomputed with its coverage, rather than
+        # quietly dropped: the pre-registration promised a coverage figure.
+        "value_form": {
+            "computed": False,
+            "native_token_coverage_pct": 0.0,
+            "reason": (
+                "ft_events carries no decimals column, so native transfers "
+                "cannot be converted to USD without per-contract metadata. "
+                "The count form is the pre-registered headline for this reason."
+            ),
+        },
+        "monthly_rates": json.loads(monthly_rates(daily).to_json(orient="records")),
         "days_sampled": len(daily),
     }
 

@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-10T16:10:23+00:00",
+  "generated_at_utc": "2026-11-10T16:29:34+00:00",
   "window": {
     "start": "2025-11-01",
     "end": "2026-10-31",
@@ -14,7 +14,7 @@
     "H1": "REJECTED",
     "H2": "REJECTED",
     "H3": "INCONCLUSIVE",
-    "H4": "PENDING",
+    "H4": "SUPPORTED",
     "H5": "REJECTED"
   },
   "hypotheses": {
@@ -790,7 +790,236 @@
     "H4": {
       "id": "H4",
       "name": "Cross-chain shift",
-      "verdict": "PENDING"
+      "predicted_direction": "up",
+      "sampling": {
+        "amended_by": "A1",
+        "days_per_month": [
+          5,
+          12,
+          19,
+          26
+        ],
+        "total_days": 48,
+        "both_legs_same_days": true,
+        "reported_as": "per-day rate with a confidence interval across the four sampled days"
+      },
+      "months_complete": 5,
+      "months_total": 6,
+      "series": {
+        "settlement_share_count": [
+          {
+            "month": "2025-11",
+            "value": 0.01725100871463061
+          },
+          {
+            "month": "2025-12",
+            "value": 0.016625129049531874
+          },
+          {
+            "month": "2026-01",
+            "value": 0.041247237349802575
+          },
+          {
+            "month": "2026-02",
+            "value": 0.045215454337634874
+          },
+          {
+            "month": "2026-03",
+            "value": 0.04489634604388335
+          }
+        ],
+        "intents_swaps": [
+          {
+            "month": "2025-11",
+            "value": 60293.0
+          },
+          {
+            "month": "2025-12",
+            "value": 53866.0
+          },
+          {
+            "month": "2026-01",
+            "value": 90683.0
+          },
+          {
+            "month": "2026-02",
+            "value": 83468.0
+          },
+          {
+            "month": "2026-03",
+            "value": 80087.0
+          }
+        ],
+        "native_transfers": [
+          {
+            "month": "2025-11",
+            "value": 3434749.0
+          },
+          {
+            "month": "2025-12",
+            "value": 3186169.0
+          },
+          {
+            "month": "2026-01",
+            "value": 2107840.0
+          },
+          {
+            "month": "2026-02",
+            "value": 1762538.0
+          },
+          {
+            "month": "2026-03",
+            "value": 1703733.0
+          }
+        ],
+        "intents_usd": [
+          {
+            "month": "2025-11",
+            "value": 173516454.67020002
+          },
+          {
+            "month": "2025-12",
+            "value": 110510999.2058
+          },
+          {
+            "month": "2026-01",
+            "value": 143142439.3775
+          },
+          {
+            "month": "2026-02",
+            "value": 153057484.9876
+          },
+          {
+            "month": "2026-03",
+            "value": 108130752.3969
+          }
+        ],
+        "bridged_transfers": [
+          {
+            "month": "2025-11",
+            "value": 35048.0
+          },
+          {
+            "month": "2025-12",
+            "value": 19398.0
+          },
+          {
+            "month": "2026-01",
+            "value": 11200.0
+          },
+          {
+            "month": "2026-02",
+            "value": 8002.0
+          },
+          {
+            "month": "2026-03",
+            "value": 5821.0
+          }
+        ]
+      },
+      "trend": {
+        "n": 5,
+        "slope_per_month": 0.008388099994660848,
+        "ci_low": 0.0007832041922589189,
+        "ci_high": 0.015992995797062776,
+        "p_value": 0.03919232275346837,
+        "r_squared": 0.8041964453027632,
+        "first": 0.01725100871463061,
+        "last": 0.04489634604388335,
+        "total_change_pct": 160.25345408240784,
+        "direction": "up"
+      },
+      "verdict": "SUPPORTED",
+      "decomposition": {
+        "intents_swaps_first": 60293.0,
+        "intents_swaps_last": 80087.0,
+        "intents_growth_pct": 32.82968172092946,
+        "native_transfers_first": 3434749.0,
+        "native_transfers_last": 1703733.0,
+        "native_growth_pct": -50.39716148108639,
+        "driven_by": "both"
+      },
+      "sender_coverage_mean": 0.4886620557144288,
+      "value_form": {
+        "computed": false,
+        "native_token_coverage_pct": 0.0,
+        "reason": "ft_events carries no decimals column, so native transfers cannot be converted to USD without per-contract metadata. The count form is the pre-registered headline for this reason."
+      },
+      "monthly_rates": [
+        {
+          "month": "2025-11",
+          "days_sampled": 4,
+          "swaps_per_day": 15073.25,
+          "swaps_per_day_sd": 2485.8587215152,
+          "usd_per_day": 43379113.667550005,
+          "usd_per_day_sd": 13231153.431278853,
+          "unique_senders_per_day": 0.0,
+          "sender_coverage": 0.0,
+          "swaps_per_day_se": 1242.9293607576,
+          "usd_per_day_se": 6615576.715639426
+        },
+        {
+          "month": "2025-12",
+          "days_sampled": 4,
+          "swaps_per_day": 13466.5,
+          "swaps_per_day_sd": 762.9720396799,
+          "usd_per_day": 27627749.80145,
+          "usd_per_day_sd": 7187400.999356533,
+          "unique_senders_per_day": 0.5,
+          "sender_coverage": 3.85366e-05,
+          "swaps_per_day_se": 381.48601984,
+          "usd_per_day_se": 3593700.4996782667
+        },
+        {
+          "month": "2026-01",
+          "days_sampled": 4,
+          "swaps_per_day": 22670.75,
+          "swaps_per_day_sd": 3424.2580096521,
+          "usd_per_day": 35785609.844375,
+          "usd_per_day_sd": 3283159.2944883737,
+          "unique_senders_per_day": 8575.5,
+          "sender_coverage": 0.7017347123,
+          "swaps_per_day_se": 1712.1290048261,
+          "usd_per_day_se": 1641579.6472441868
+        },
+        {
+          "month": "2026-02",
+          "days_sampled": 4,
+          "swaps_per_day": 20867.0,
+          "swaps_per_day_sd": 6950.5009891374,
+          "usd_per_day": 38264371.2469,
+          "usd_per_day_sd": 19889906.496539954,
+          "unique_senders_per_day": 8911.75,
+          "sender_coverage": 0.8215152771,
+          "swaps_per_day_se": 3475.2504945687,
+          "usd_per_day_se": 9944953.248269977
+        },
+        {
+          "month": "2026-03",
+          "days_sampled": 4,
+          "swaps_per_day": 20021.75,
+          "swaps_per_day_sd": 1856.5718183433,
+          "usd_per_day": 27032688.099225,
+          "usd_per_day_sd": 4045687.7558658547,
+          "unique_senders_per_day": 11122.0,
+          "sender_coverage": 0.9200217525,
+          "swaps_per_day_se": 928.2859091717,
+          "usd_per_day_se": 2022843.8779329273
+        },
+        {
+          "month": "2026-04",
+          "days_sampled": 2,
+          "swaps_per_day": 16628.0,
+          "swaps_per_day_sd": 598.2123368838,
+          "usd_per_day": 22925786.828,
+          "usd_per_day_sd": 3549218.6372314002,
+          "unique_senders_per_day": 10020.5,
+          "sender_coverage": 0.9206805324,
+          "swaps_per_day_se": 423.0,
+          "usd_per_day_se": 2509676.5663
+        }
+      ],
+      "days_sampled": 22
     },
     "H5": {
       "id": "H5",
@@ -1030,9 +1259,9 @@
     }
   },
   "cost": {
-    "queries": 50,
-    "bytes_billed": 926685331456,
-    "est_usd": 5.267602
+    "queries": 63,
+    "bytes_billed": 934505611264,
+    "est_usd": 5.312055
   },
   "diagnostics": {
     "balance_table_coverage": {

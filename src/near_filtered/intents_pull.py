@@ -172,9 +172,11 @@ def run(window: Window, client: IntentsClient | None = None) -> pd.DataFrame:
                 f"   ({client.requests_made} requests so far)"
             )
         summaries.append(summarise_day(frame, day))
+        # Written after every day, not only at the end, so a partial pull is
+        # still usable and an interrupted run leaves something behind.
+        pd.DataFrame(summaries).to_csv(config.CACHE_DIR / "intents_daily.csv", index=False)
 
     daily = pd.DataFrame(summaries)
-    daily.to_csv(config.CACHE_DIR / "intents_daily.csv", index=False)
     print(f"\nwrote data/cache/intents_daily.csv ({len(daily)} days)")
     return daily
 
