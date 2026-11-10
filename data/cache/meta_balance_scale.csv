@@ -1,0 +1,2 @@
+rows_in_partition,epochs_on_this_date,median_liquid,p99_liquid,max_liquid,max_staked,log10_max_liquid
+30228,1,0.05375,136269.24877199356,105636360.98874885,47512105.0,8.023813432011156
