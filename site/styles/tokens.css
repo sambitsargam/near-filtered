@@ -1,0 +1,43 @@
+/* Design tokens — the only colors, radii and spacing the site may use.
+   A research terminal for sceptical readers: the data is the hero, so the
+   palette stays dark and quiet and the accents mean something.
+
+     cobalt  NEAR-native series, links, focus
+     lime    supported by the evidence / the headline metric
+     coral   evidence against / REJECTED — given equal weight to lime
+     amber   inconclusive
+
+   Color is never the only signal: every verdict also carries its word. */
+:root {
+  /* surfaces */
+  --bg:        #05060A;
+  --surface:   #0B0D14;
+  --surface-2: #11141D;
+  --border:    #1C2130;
+
+  /* text */
+  --text:       #F2F4F8;
+  --text-muted: #8A93A6;
+  --text-faint: #4A5263;
+
+  /* semantics */
+  --cobalt:      #2F5BFF;
+  --cobalt-soft: #6E8BFF;
+  --lime:        #C6FF1A;
+  --coral:       #FF5C7A;
+  --amber:       #FFB020;
+
+  /* the one permitted glow — active chart / selected card only, never text */
+  --glow-cobalt: 0 0 24px rgba(47, 91, 255, 0.3);
+  --glow-lime:   0 0 24px rgba(198, 255, 26, 0.3);
+  --glow-coral:  0 0 24px rgba(255, 92, 122, 0.3);
+
+  /* shape & rhythm: 8px grid, 14px card radius */
+  --radius: 14px;
+  --s1: 8px;  --s2: 16px;  --s3: 24px;  --s4: 32px;  --s6: 48px;  --s8: 64px;
+
+  /* type */
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
