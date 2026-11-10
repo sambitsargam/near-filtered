@@ -22,36 +22,36 @@ def test_a_well_formed_query_passes():
 
 
 def test_single_partition_equality_passes():
-    guard_sql("SELECT status, COUNT(*) AS n FROM t WHERE block_date = @day GROUP BY status")
+    guard_sql("SELECT status, COUNT(*) AS n FROM `bigquery-public-data.crypto_near_mainnet_us.transactions` WHERE block_date = @day GROUP BY status")
 
 
 def test_epoch_date_is_accepted_as_a_partition_column():
-    guard_sql("SELECT account_id, liquid FROM b WHERE epoch_date = @day")
+    guard_sql("SELECT account_id, liquid FROM `bigquery-public-data.crypto_near_mainnet_us.ft_balances_daily` WHERE epoch_date = @day")
 
 
 def test_select_star_is_rejected():
     with pytest.raises(QueryRejected, match="SELECT \\*"):
-        guard_sql("SELECT * FROM t WHERE block_date >= @start")
+        guard_sql("SELECT * FROM `bigquery-public-data.crypto_near_mainnet_us.transactions` WHERE block_date >= @start")
 
 
 def test_select_star_rejected_case_insensitively():
     with pytest.raises(QueryRejected):
-        guard_sql("select   *  from t where block_date >= @start")
+        guard_sql("select   *  from `bigquery-public-data.crypto_near_mainnet_us.transactions` where block_date >= @start")
 
 
 def test_missing_partition_column_is_rejected():
     with pytest.raises(QueryRejected, match="No partition column"):
-        guard_sql("SELECT signer_account_id FROM t WHERE signer_account_id = 'x'")
+        guard_sql("SELECT signer_account_id FROM `bigquery-public-data.crypto_near_mainnet_us.transactions` WHERE signer_account_id = 'x'")
 
 
 def test_partition_column_selected_but_never_filtered_is_rejected():
     with pytest.raises(QueryRejected, match="never compared"):
-        guard_sql("SELECT block_date, COUNT(*) AS n FROM t GROUP BY block_date")
+        guard_sql("SELECT block_date, COUNT(*) AS n FROM `bigquery-public-data.crypto_near_mainnet_us.transactions` GROUP BY block_date")
 
 
 def test_a_commented_out_date_filter_does_not_satisfy_the_guard():
     sql = """
-    SELECT signer_account_id FROM t
+    SELECT signer_account_id FROM `bigquery-public-data.crypto_near_mainnet_us.transactions`
     -- WHERE block_date BETWEEN @start AND @end
     """
     with pytest.raises(QueryRejected):
@@ -60,7 +60,7 @@ def test_a_commented_out_date_filter_does_not_satisfy_the_guard():
 
 def test_a_block_commented_date_filter_does_not_satisfy_the_guard():
     sql = """
-    SELECT signer_account_id FROM t
+    SELECT signer_account_id FROM `bigquery-public-data.crypto_near_mainnet_us.transactions`
     /* WHERE block_date >= @start */
     """
     with pytest.raises(QueryRejected):
@@ -85,3 +85,25 @@ def test_every_shipped_sql_file_satisfies_the_guards():
         guard_sql(sql)
         checked += 1
     assert checked > 0, "no non-metadata SQL files were checked"
+
+
+def test_a_query_over_our_own_staging_tables_needs_no_partition_filter():
+    """The partition rule guards the public dataset, not our own small tables."""
+    guard_sql(
+        "SELECT min_active_days, COUNT(*) AS n "
+        "FROM `my-project.near_filtered_staging.per_account_2026_10` "
+        "GROUP BY min_active_days"
+    )
+
+
+def test_select_star_is_still_rejected_on_our_own_tables():
+    with pytest.raises(QueryRejected, match="SELECT \\*"):
+        guard_sql("SELECT * FROM `my-project.near_filtered_staging.per_account_2026_10`")
+
+
+def test_a_public_dataset_query_still_needs_its_partition_filter():
+    with pytest.raises(QueryRejected, match="No partition column"):
+        guard_sql(
+            "SELECT signer_account_id FROM "
+            "`bigquery-public-data.crypto_near_mainnet_us.transactions`"
+        )

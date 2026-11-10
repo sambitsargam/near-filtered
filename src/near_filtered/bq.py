@@ -60,10 +60,18 @@ def guard_sql(sql: str) -> None:
             "SELECT * is not allowed: name the columns you need. BigQuery bills per column scanned."
         )
 
+    # The partition rule exists to bound scans of the public dataset, which is
+    # measured in terabytes. A query that touches none of it reads only our own
+    # staging tables, which we built and which are small by construction, so
+    # there is nothing for the rule to protect.
+    if "bigquery-public-data" not in lowered:
+        return
+
     if not any(col in lowered for col in _PARTITION_COLS):
         raise QueryRejected(
-            "No partition column found. Every query must filter on "
-            f"one of {_PARTITION_COLS} so it reads a bounded set of partitions."
+            "No partition column found. Every query reading the public dataset "
+            f"must filter on one of {_PARTITION_COLS} so it reads a bounded set "
+            f"of partitions."
         )
 
     if not _PARTITION_FILTER.search(body):
