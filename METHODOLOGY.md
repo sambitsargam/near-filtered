@@ -83,7 +83,7 @@ receiver account:
 - **top-10 share** — the fraction going to the ten busiest receivers.
 - **HHI** — the sum of squared receiver shares, on the **0–1 scale**. 1.0 is
   one receiver taking everything; 1/n is n equal receivers. We state the
-  scale because the alternative 0–10,000 convention differs by four orders
+  scale because the alternative `0-10,000` convention differs by four orders
   of magnitude.
 
 Restricting to economic accounts matters: an unfiltered measure would mostly
