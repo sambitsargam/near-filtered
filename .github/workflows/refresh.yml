@@ -1,0 +1,48 @@
+# Monthly live refresh - the "living thesis". Needs two repository secrets,
+# added by the maintainer, never committed:
+#
+#   GCP_SA_KEY    JSON key for a service account with the BigQuery Job User
+#                 role on the billing project
+#   INTENTS_JWT   partner JWT from https://partners.near-intents.org/
+#
+# The refresh re-pulls every series, regenerates metrics and THESIS.md, and
+# opens a pull request rather than pushing to main, so a human sees the new
+# verdicts before they publish.
+name: monthly-refresh
+on:
+  schedule:
+    - cron: "17 6 2 * *"   # 06:17 UTC on the 2nd - after month-end data lands
+  workflow_dispatch: {}
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.6.6"
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - run: make install
+      - name: refresh
+        env:
+          INTENTS_JWT: ${{ secrets.INTENTS_JWT }}
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+        run: |
+          uv run nf inventory
+          uv run python -m near_filtered.metrics
+          uv run python -m near_filtered.render
+      - run: make verify
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          branch: refresh/monthly
+          title: "data: monthly refresh"
+          commit-message: "data: monthly refresh"
+          body: >
+            Automated monthly refresh. Review the regenerated verdicts in
+            THESIS.md before merging; a changed verdict is a finding, not a
+            formality.
