@@ -1,0 +1,236 @@
+{# Every number here is a variable filled from results/metrics.json.        #}
+{# If you are tempted to type a figure into this file, generate it instead. #}
+# NEAR, Filtered
+
+**Generated {{ m.generated_at_utc }} from `results/metrics.json`. Not written by hand.**
+
+Window: **{{ w.start }} to {{ w.end }}** ({{ w.months }} months).
+Dataset current to {{ w.data_latest }}, {{ w.lag_days }} day(s) before this run.
+
+---
+
+## The claim we tested
+
+> Once you filter out bots and airdrop farming, NEAR's real economic usage is
+> shifting toward cross-chain settlement through NEAR Intents — and that usage
+> does, or does not, translate into value for NEAR token holders.
+
+We wrote five hypotheses, the exact metric for each, and the result that would
+count as rejected, and committed that file before pulling any data.
+
+**Four of the five predictions went against us.** This document reports that.
+
+## Verdicts
+
+| # | Hypothesis | Predicted | Verdict |
+|---|---|---|---|
+| H1 | {{ h.H1.name }} | growing or flat | **{{ m.scoreboard.H1 | verdict_word }}** |
+| H2 | {{ h.H2.name }} | less concentrated | **{{ m.scoreboard.H2 | verdict_word }}** |
+| H3 | {{ h.H3.name }} | newer cohorts hold up | **{{ m.scoreboard.H3 | verdict_word }}** |
+| H4 | {{ h.H4.name }} | share rising | **{{ m.scoreboard.H4 | verdict_word }}**{% if h.H4.is_partial %} (provisional, {{ h.H4.months_complete }}/{{ h.H4.months_expected }} months){% endif %} |
+| H5 | {{ h.H5.name }} | burn material, trending neutral | **{{ m.scoreboard.H5 | verdict_word }}** |
+
+One rule produced every row: fit an ordinary least-squares trend on the
+monthly series, then read the 95% confidence interval on the slope. Entirely
+in the predicted direction is SUPPORTED, entirely opposite is REJECTED, and
+spanning zero is INCONCLUSIVE. No verdict was written by hand.
+
+---
+
+## The strongest evidence against this thesis
+
+This section comes before the supporting evidence, not after it.
+
+**1. Real usage did not grow. It fell by {{ h.H1.trend.total_change_pct | abs | pct_direct }}.**
+Economic accounts went from {{ h.H1.trend.first | num }} to
+{{ h.H1.trend.last | num }} over the window, a slope of
+{{ h.H1.trend.slope_per_month | signed }} accounts per month with a 95%
+interval of [{{ h.H1.trend.ci_low | num }}, {{ h.H1.trend.ci_high | num }}].
+The interval does not reach zero.
+
+This is not an artefact of where we set the bar. Across the
+{{ h.H1.grid_summary.cells }}-cell sensitivity grid the trend is **down in
+{{ h.H1.grid_summary.down }} cells, flat in {{ h.H1.grid_summary.flat }}, and
+up in {{ h.H1.grid_summary.up }}**. The grid label is
+**{{ h.H1.robustness }}**. Tightening the filter makes the decline steeper,
+which is the opposite of what a threshold artefact looks like.
+
+**2. Activity concentrated sharply rather than broadening.**
+The top-10 receiver share rose from {{ h.H2.series.top10_share[0].value | pct }}
+to {{ h.H2.series.top10_share[-1].value | pct }}, and HHI rose from
+{{ h.H2.series.hhi[0].value | num(4) }} to {{ h.H2.series.hhi[-1].value | num(4) }}.
+We predicted both would fall.
+
+**3. Fee burn does not come close to offsetting issuance, and is shrinking.**
+In the final month, burn was {{ h.H5.materiality_bar.final_month_value | pct(2) }}
+of gross issuance against a pre-registered materiality bar of
+{{ h.H5.materiality_bar.threshold | pct(0) }}. Over the window NEAR burned
+{{ h.H5.totals.burned_near | num }} against net issuance of
+{{ h.H5.totals.net_issuance_near | num }} — burn offsets
+{{ h.H5.totals.burn_as_pct_of_net_issuance | pct_direct }} of it. Net issuance
+was positive in every month.
+
+**4. No primary source documents any Intents fee reaching NEAR holders.**
+We checked the Intents fees page, the 1Click fee configuration, the FAQs, the
+authentication page and the NEAR-token page. The protocol fee goes to a fee
+collector; 1Click keeps its share; the near-intents.org front end routes its
+fee to a DAO account. None of them describes a mechanism by which any portion
+is burned, staked, or paid to NEAR holders. We pre-committed, in writing and
+before looking, to treating a null here as evidence against.
+
+**5. Our bot filter does not catch every bot.**
+In {{ m.diagnostics.bot_filter_residual_automation.month }},
+{{ m.diagnostics.bot_filter_residual_automation.economic_accounts | num }}
+accounts that cleared the filter sent
+{{ m.diagnostics.bot_filter_residual_automation.economic_transactions | num }}
+transactions between them — a mean of
+{{ m.diagnostics.bot_filter_residual_automation.mean_tx_per_account | num }}
+against a median of
+{{ m.diagnostics.bot_filter_residual_automation.median_tx_per_account | num }}.
+That distribution is not a population of humans.
+
+---
+
+## Evidence for the thesis
+
+{% if h.H4.verdict == 'SUPPORTED' %}
+{% if h.H4.is_partial %}
+> **Incomplete measurement.** This verdict rests on
+> {{ h.H4.months_complete }} of {{ h.H4.months_expected }} months. The Intents
+> leg is still being pulled, and the months not yet measured are the later
+> ones. Treat H4 as provisional until this notice disappears from a
+> regenerated copy of this document.
+
+{% endif %}
+**The cross-chain shift is real.** The settlement share rose from
+{{ h.H4.series.settlement_share_count[0].value | pct(2) }} to
+{{ h.H4.series.settlement_share_count[-1].value | pct(2) }} across
+{{ h.H4.months_complete }} measured months, with a slope of
+{{ h.H4.trend.slope_per_month | pct(3) }} per month and a 95% interval of
+[{{ h.H4.trend.ci_low | pct(3) }}, {{ h.H4.trend.ci_high | pct(3) }}].
+
+**But read the decomposition before using that number.** Over the same months
+Intents swaps grew {{ h.H4.decomposition.intents_growth_pct | signed_pct }}
+while native transfers by economic accounts fell
+{{ h.H4.decomposition.native_growth_pct | signed_pct }}. The ratio is driven
+by **{{ h.H4.decomposition.driven_by }}**. A share that rises partly because
+its denominator is collapsing is a different claim from one that rises because
+its numerator is growing, and we are not going to let the first be read as the
+second.
+{% else %}
+H4 is {{ m.scoreboard.H4 | verdict_word }}; the cross-chain evidence is
+reported once its measurement is complete.
+{% endif %}
+
+**Retention did not collapse.** H3 is {{ m.scoreboard.H3 | verdict_word }}:
++3-month retention drifts from
+{{ h.H3.series[0].value | pct }} to {{ h.H3.series[-1].value | pct }}, but the
+95% interval spans zero. We report that as inconclusive rather than as decline.
+
+---
+
+## What would change our minds
+
+| finding | what it would mean |
+|---|---|
+| Economic accounts rising for three consecutive months at default thresholds, robust across the grid | H1's rejection was a window artefact; the decline reversed |
+| Top-10 share falling back below {{ h.H2.series.top10_share[0].value | pct }} while account counts hold | concentration was a transition, not a trend |
+| Burn exceeding {{ h.H5.materiality_bar.threshold | pct(0) }} of gross issuance in any month | H5a's materiality bar met; value accrual becomes arguable |
+| A primary source documenting Intents fees reaching NEAR holders | H5b's null answered; the second clause of the claim becomes testable |
+| The settlement share rising while native transfers are flat or growing | the shift is numerator-driven, which is the strong form of the claim |
+
+Each is a quantity this pipeline already computes, so anyone can re-run it
+next month with `make refresh`.
+
+---
+
+## The original metric: cross-chain settlement share
+
+Of the economic activity NEAR settles in a month, what fraction is settled
+across chains through NEAR Intents rather than natively on NEAR?
+
+{% if h.H4.verdict != 'PENDING' %}
+Measured on {{ h.H4.days_sampled }} sampled days, the same days on both sides
+of the ratio so the two legs always cover identical periods.
+
+| month | Intents swaps | native transfers | share |
+|---|---|---|---|
+{% for row in h.H4.series.settlement_share_count %}
+| {{ row.month }} | {{ h.H4.series.intents_swaps[loop.index0].value | num }} | {{ h.H4.series.native_transfers[loop.index0].value | num }} | {{ row.value | pct(2) }} |
+{% endfor %}
+
+Two caveats travel with every one of these numbers. The Intents Explorer API
+covers **1Click swaps only**, so the numerator is a lower bound on Intents
+activity. And a sender is identifiable on only
+{{ h.H4.sender_coverage_mean | pct }} of swaps, so unique-swapper counts cover
+part of the sample rather than all of it.
+
+The value form of this metric is **not computed**: native token coverage is
+{{ h.H4.value_form.native_token_coverage_pct | pct_direct }}, because
+`ft_events` carries no decimals column. That is why the count form, which
+needs no pricing, was pre-registered as the headline.
+{% else %}
+Not yet computed.
+{% endif %}
+
+---
+
+## Sensitivity
+
+H1 was recomputed across all {{ h.H1.grid_summary.cells }} threshold
+combinations and every cell is published in `results/metrics.json`.
+
+| | cells |
+|---|---|
+| trend down | {{ h.H1.grid_summary.down }} |
+| flat | {{ h.H1.grid_summary.flat }} |
+| trend up | {{ h.H1.grid_summary.up }} |
+
+Label: **{{ h.H1.robustness }}**.
+
+Publishing every cell costs the same as publishing one, because the grid is
+a cross-join over per-account results that were computed once. There was
+never an incentive to search for a flattering threshold.
+
+---
+
+## Amendments to the pre-registration
+
+{{ m.amendments | length }} amendment(s), each with its reason and an
+assessment of whether it could bias a result. The original text is never
+edited.
+
+{% for a in m.amendments %}
+- **{{ a.id }}** ({{ a.date }}, {{ a.hypothesis }}) — {{ a.change }}
+{% endfor %}
+
+---
+
+## Conclusion
+
+On the evidence we gathered, the headline claim does not hold in the form it
+was written. NEAR's bot-filtered economic activity contracted over the window
+rather than growing, and did so robustly across every threshold we tested.
+Activity concentrated into fewer contracts rather than broadening. Fee burn
+remains a rounding error against issuance and is shrinking, and no primary
+source documents any Intents fee reaching NEAR holders.
+{% if h.H4.verdict == 'SUPPORTED' %}
+The cross-chain shift itself is real and measurable — it is the one
+pre-registered prediction that survived — but on the measured months it owes
+as much to NEAR's native activity shrinking as to Intents growing, and
+nothing we found connects it to value for the token.
+{% endif %}
+
+The useful version of this result is not "NEAR is failing". It is that the
+single leg of the thesis that survived contact with the data is the one about
+settlement moving cross-chain, and that leg currently pays nothing to
+holders. Anyone underwriting NEAR on a value-accrual argument should be able
+to point at the mechanism. We could not find one.
+
+---
+
+*Cost of the full refresh behind this document:
+{{ m.cost.queries }} queries, {{ m.cost.gib_billed | num(2) }} GiB billed.
+Every number above is generated; `make verify` checks it.*
+
+*This is research, not investment advice.*

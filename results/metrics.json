@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-10T16:29:34+00:00",
+  "generated_at_utc": "2026-11-10T16:50:55+00:00",
   "window": {
     "start": "2025-11-01",
     "end": "2026-10-31",
@@ -805,6 +805,8 @@
       },
       "months_complete": 5,
       "months_total": 6,
+      "months_expected": 12,
+      "is_partial": true,
       "series": {
         "settlement_share_count": [
           {
@@ -1261,7 +1263,8 @@
   "cost": {
     "queries": 63,
     "bytes_billed": 934505611264,
-    "est_usd": 5.312055
+    "gib_billed": 870.33,
+    "est_usd": 5.31
   },
   "diagnostics": {
     "balance_table_coverage": {

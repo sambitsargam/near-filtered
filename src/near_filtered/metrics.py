@@ -304,6 +304,10 @@ def build_h4() -> dict:
         "sampling": prereg.hypothesis("H4")["sampling"],
         "months_complete": len(complete),
         "months_total": len(merged),
+        "months_expected": int(prereg.load()["window"]["months"]),
+        # A verdict standing on part of the window must say so, loudly, in
+        # every document that quotes it.
+        "is_partial": bool(len(complete) < int(prereg.load()["window"]["months"])),
         "series": {
             "settlement_share_count": _series(complete, "month", "settlement_share_count"),
             "intents_swaps": _series(complete, "month", "intents_swaps"),
@@ -458,7 +462,13 @@ def build() -> dict:
         "cost": {
             "queries": len(ledger),
             "bytes_billed": int(ledger.bytes_billed.sum()) if len(ledger) else 0,
-            "est_usd": float(ledger.est_usd.sum()) if len(ledger) else 0.0,
+            # Pre-converted here rather than in a template. A template that
+            # does arithmetic produces a number the data never generated,
+            # which is exactly what the drift check exists to stop.
+            "gib_billed": round(
+                float(ledger.bytes_billed.sum()) / 1024**3 if len(ledger) else 0.0, 2
+            ),
+            "est_usd": round(float(ledger.est_usd.sum()) if len(ledger) else 0.0, 2),
         },
         "diagnostics": build_diagnostics(),
         "amendments": prereg.load()["amendments"],

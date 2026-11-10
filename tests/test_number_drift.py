@@ -180,3 +180,25 @@ def test_identifiers_are_not_read_as_numbers(allowed):
 def test_a_real_negative_number_is_still_caught(allowed):
     findings = drift.check_file_text("the slope was -0.2546 per month", allowed, "x.md")
     assert [f.number for f in findings] == ["-0.2546"]
+
+
+def test_the_thesis_template_does_no_arithmetic():
+    """A template that computes produces numbers the data never generated.
+
+    Regression: the cost line once did `bytes_billed / 1073741824`, which the
+    drift check correctly rejected. Conversions belong in metrics.py.
+    """
+    import re
+
+    from near_filtered import config
+
+    template = config.TEMPLATES_DIR / "THESIS.md.j2"
+    if not template.exists():
+        return
+    body = template.read_text()
+    # Arithmetic operators inside a {{ ... }} expression, ignoring filters.
+    for match in re.finditer(r"\{\{(.+?)\}\}", body, re.DOTALL):
+        expression = match.group(1)
+        assert not re.search(r"[*/+]|(?<!\w)-(?!\w)", expression.split("|")[0]), (
+            f"template expression does arithmetic: {expression.strip()!r}"
+        )
