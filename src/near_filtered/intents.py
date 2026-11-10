@@ -95,7 +95,12 @@ class IntentsClient:
         digest = hashlib.sha256(key.encode()).hexdigest()[:20]
         return self.cache_dir / f"page_{digest}.json"
 
-    def _get(self, params: dict, max_retries: int = 6) -> list[dict]:
+    def _get(
+        self,
+        params: dict,
+        max_retries: int = 6,
+        timeout: float = config.INTENTS_TIMEOUT_S,
+    ) -> list[dict]:
         cached = self._cache_file(params)
         if cached.exists():
             self.pages_from_cache += 1
@@ -106,7 +111,26 @@ class IntentsClient:
 
         for attempt in range(1, max_retries + 1):
             self.limiter.wait()
-            response = self.session.get(url, params=params, timeout=60)
+            try:
+                response = self.session.get(url, params=params, timeout=timeout)
+            except (requests.Timeout, requests.ConnectionError) as exc:
+                # A single slow response must not end a pull that is hundreds
+                # of requests long. Back off and try the same page again; the
+                # page cache means nothing already fetched is re-fetched.
+                self.requests_made += 1
+                wait = min(backoff * 2**attempt, 120)
+                print(
+                    f"    {type(exc).__name__} after {timeout:.0f}s; "
+                    f"retrying in {wait:.0f}s (attempt {attempt}/{max_retries})"
+                )
+                if attempt == max_retries:
+                    raise RuntimeError(
+                        f"Intents API did not respond after {max_retries} attempts "
+                        f"({type(exc).__name__}). The service may be down; the page "
+                        f"cache means a later re-run resumes rather than restarts."
+                    ) from exc
+                time.sleep(wait)
+                continue
             self.requests_made += 1
 
             if response.status_code == 200:

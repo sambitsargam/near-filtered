@@ -21,9 +21,18 @@ WITH window_tx AS (
     receiver_account_id
   FROM `bigquery-public-data.crypto_near_mainnet_us.transactions`
   WHERE block_date BETWEEN @window_start AND @window_end
-    -- @success_status is resolved from sql/meta_tx_status_values.sql, never
-    -- guessed. Passing NULL counts every signed transaction, which we report
-    -- as a robustness variant rather than the headline.
+    -- Pre-registered choice: count every signed transaction.
+    --
+    -- `transactions.status` describes whether the transaction converted into a
+    -- receipt, not whether execution succeeded; sql/meta_tx_status_values.sql
+    -- found a single value, SUCCESS_RECEIPT_ID, across 502,649 rows on the
+    -- probe date, so filtering on it is close to a no-op. True execution
+    -- outcomes live in execution_outcomes, a table four times the size, and
+    -- joining it is not worth the scan. A signed transaction paid a fee and
+    -- represents real intent, which is what the filter is for. Stated in
+    -- LIMITATIONS.md.
+    --
+    -- @success_status remains available as a robustness variant.
     AND (@success_status IS NULL OR status = @success_status)
 ),
 
@@ -42,14 +51,23 @@ per_account AS (
 balances_at_window_end AS (
   SELECT
     account_id,
-    (liquid + staked) / 1e24 AS balance_near   -- yoctoNEAR -> NEAR
+    -- Already denominated in NEAR, NOT yoctoNEAR. Verified by
+    -- sql/meta_balance_scale.sql: on the probe date the maximum `liquid` was
+    -- ~1.06e8, and the median ~0.054. Dividing by 1e24 here would push every
+    -- balance to ~0, so the b >= 0.1 threshold would exclude every account
+    -- and H1-H3 would return zeros that look like real data.
+    (liquid + staked) AS balance_near
   FROM (
     SELECT
       account_id,
       liquid,
       staked,
+      -- epoch_block_height is a STRING in this dataset, so it must be cast
+      -- before ordering: a lexicographic sort puts '9...' above '10...' and
+      -- would pick the wrong epoch's balance.
       ROW_NUMBER() OVER (
-        PARTITION BY account_id ORDER BY epoch_block_height DESC
+        PARTITION BY account_id
+        ORDER BY SAFE_CAST(epoch_block_height AS INT64) DESC
       ) AS rn
     FROM `bigquery-public-data.crypto_near_mainnet_us.ft_balances_daily`
     WHERE epoch_date = @balance_date

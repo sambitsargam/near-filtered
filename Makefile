@@ -13,13 +13,14 @@ UV ?= uv
 RUN := $(UV) run
 
 .DEFAULT_GOAL := help
-.PHONY: help install test lint fmt verify rebuild refresh inventory sample-cost window cost clean
+.PHONY: help install env test lint fmt verify rebuild refresh inventory sample-cost window cost clean
 
 help:
 	@echo "NEAR, Filtered"
 	@echo ""
 	@echo "  No keys needed:"
 	@echo "    make install      create the virtualenv from the pinned lockfile"
+	@echo "    make env          create or repair .env (never overwrites a set value)"
 	@echo "    make test         unit tests on the transforms"
 	@echo "    make verify       tests + number-drift check + rebuild from cache"
 	@echo "    make rebuild      regenerate results, charts, THESIS.md, dashboard"
@@ -33,6 +34,10 @@ help:
 
 install:
 	$(UV) sync --all-groups --frozen
+
+# Safe alternative to `cp .env.example .env`, which destroys a working config.
+env:
+	$(RUN) python scripts/setup_env.py
 
 test:
 	$(RUN) pytest
@@ -49,7 +54,7 @@ fmt:
 verify: test
 	@echo ""
 	@echo "=== number-drift check ==========================================="
-	@echo "not yet wired (lands with the generated THESIS.md)"
+	@$(RUN) python -m near_filtered.drift
 	@echo ""
 	@echo "=== rebuild from committed data =================================="
 	@$(MAKE) --no-print-directory rebuild

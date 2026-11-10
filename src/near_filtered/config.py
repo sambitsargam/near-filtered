@@ -46,6 +46,9 @@ DEFAULT_MAX_BYTES_BILLED = 50 * 1024**3  # 50 GiB
 INTENTS_BASE_URL = "https://explorer.near-intents.org/api/v0"
 INTENTS_MIN_INTERVAL_S = 5.2
 INTENTS_PAGE_SIZE = 1000  # documented maximum for numberOfTransactions
+# The explorer can be slow on wide or filtered queries; a long pull must
+# tolerate that rather than abort on one slow response.
+INTENTS_TIMEOUT_S = 180.0
 
 # --- Prices ---------------------------------------------------------------
 COINGECKO_BASE_URL = "https://api.coingecko.com/api/v3"

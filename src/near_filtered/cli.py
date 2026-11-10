@@ -101,6 +101,12 @@ def main(argv: list[str] | None = None) -> int:
     except (RuntimeError, bq.QueryRejected) as exc:
         print(f"\nerror: {exc}", file=sys.stderr)
         return 1
+    except Exception as exc:  # noqa: BLE001 - a clean message beats a traceback
+        # BigQuery errors are long and wrapped in retry frames. The first line
+        # is the part that says what is actually wrong with the query.
+        first_line = str(exc).strip().splitlines()[0] if str(exc).strip() else repr(exc)
+        print(f"\n{type(exc).__name__}: {first_line}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
