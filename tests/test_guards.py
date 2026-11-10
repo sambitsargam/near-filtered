@@ -22,31 +22,43 @@ def test_a_well_formed_query_passes():
 
 
 def test_single_partition_equality_passes():
-    guard_sql("SELECT status, COUNT(*) AS n FROM `bigquery-public-data.crypto_near_mainnet_us.transactions` WHERE block_date = @day GROUP BY status")
+    guard_sql(
+        "SELECT status, COUNT(*) AS n FROM `bigquery-public-data.crypto_near_mainnet_us.transactions` WHERE block_date = @day GROUP BY status"
+    )
 
 
 def test_epoch_date_is_accepted_as_a_partition_column():
-    guard_sql("SELECT account_id, liquid FROM `bigquery-public-data.crypto_near_mainnet_us.ft_balances_daily` WHERE epoch_date = @day")
+    guard_sql(
+        "SELECT account_id, liquid FROM `bigquery-public-data.crypto_near_mainnet_us.ft_balances_daily` WHERE epoch_date = @day"
+    )
 
 
 def test_select_star_is_rejected():
     with pytest.raises(QueryRejected, match="SELECT \\*"):
-        guard_sql("SELECT * FROM `bigquery-public-data.crypto_near_mainnet_us.transactions` WHERE block_date >= @start")
+        guard_sql(
+            "SELECT * FROM `bigquery-public-data.crypto_near_mainnet_us.transactions` WHERE block_date >= @start"
+        )
 
 
 def test_select_star_rejected_case_insensitively():
     with pytest.raises(QueryRejected):
-        guard_sql("select   *  from `bigquery-public-data.crypto_near_mainnet_us.transactions` where block_date >= @start")
+        guard_sql(
+            "select   *  from `bigquery-public-data.crypto_near_mainnet_us.transactions` where block_date >= @start"
+        )
 
 
 def test_missing_partition_column_is_rejected():
     with pytest.raises(QueryRejected, match="No partition column"):
-        guard_sql("SELECT signer_account_id FROM `bigquery-public-data.crypto_near_mainnet_us.transactions` WHERE signer_account_id = 'x'")
+        guard_sql(
+            "SELECT signer_account_id FROM `bigquery-public-data.crypto_near_mainnet_us.transactions` WHERE signer_account_id = 'x'"
+        )
 
 
 def test_partition_column_selected_but_never_filtered_is_rejected():
     with pytest.raises(QueryRejected, match="never compared"):
-        guard_sql("SELECT block_date, COUNT(*) AS n FROM `bigquery-public-data.crypto_near_mainnet_us.transactions` GROUP BY block_date")
+        guard_sql(
+            "SELECT block_date, COUNT(*) AS n FROM `bigquery-public-data.crypto_near_mainnet_us.transactions` GROUP BY block_date"
+        )
 
 
 def test_a_commented_out_date_filter_does_not_satisfy_the_guard():

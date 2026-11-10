@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-10T16:00:53+00:00",
+  "generated_at_utc": "2026-11-10T16:06:03+00:00",
   "window": {
     "start": "2025-11-01",
     "end": "2026-10-31",
@@ -847,9 +847,44 @@
     }
   },
   "cost": {
-    "queries": 38,
-    "bytes_billed": 554263642112,
-    "est_usd": 3.1506280000000007
+    "queries": 45,
+    "bytes_billed": 863127994368,
+    "est_usd": 4.906320000000001
+  },
+  "diagnostics": {
+    "balance_table_coverage": {
+      "distinct_signers": 816171,
+      "accounts_with_balance_row": 30228,
+      "signers_matched": 3064,
+      "matched_pct": 0.38
+    },
+    "tx_status_probe": {
+      "distinct_values": 1,
+      "rows_examined": 502649,
+      "values": [
+        "SUCCESS_RECEIPT_ID"
+      ]
+    },
+    "ft_balances_daily_probe": {
+      "rows_in_partition": 30228,
+      "max_liquid": 105636360.98874885
+    },
+    "ft_contract_concentration_probe": {
+      "top25_transfers": 594376,
+      "top2_contracts": [
+        "game.hot.tg",
+        "token.sweat"
+      ],
+      "top2_share_pct": 74.2,
+      "bridged_omft_share_pct": 10.8
+    },
+    "bot_filter_residual_automation": {
+      "month": "2025-11",
+      "economic_accounts": 50158,
+      "economic_transactions": 113425819,
+      "mean_tx_per_account": 2261,
+      "median_tx_per_account": 36
+    }
   },
   "amendments": [
     {

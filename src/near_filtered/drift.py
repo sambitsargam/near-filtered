@@ -41,7 +41,10 @@ _HTML_ATTR = re.compile(r'\w+="[^"]*"')
 # grouped thousands separators, optional decimal part, optional trailing %.
 # The comma groups must be exactly three digits, so "Nov 14, 2026" yields
 # "14" and "2026" rather than a spurious "14,".
-_NUMBER = re.compile(r"-?\d+(?:,\d{3})*(?:\.\d+)?%?")
+# The lookbehind keeps identifiers out: the "029" in "HSP-029" and the "1"
+# in "H1" are names, not quantities, and flagging them would train a reader
+# to ignore this check.
+_NUMBER = re.compile(r"(?<![A-Za-z0-9_-])-?\d+(?:,\d{3})*(?:\.\d+)?%?")
 
 # Bare small integers and calendar years are structural: section numbers,
 # list markers, "five hypotheses", "the 30-day window", a year in a date.
@@ -206,7 +209,7 @@ def check_file(path: Path, allowed: set[str]) -> list[Finding]:
 
 def documents_to_check() -> list[Path]:
     paths: list[Path] = []
-    for name in ("THESIS.md", "README.md"):
+    for name in ("THESIS.md", "README.md", "LIMITATIONS.md", "METHODOLOGY.md"):
         candidate = config.ROOT / name
         if candidate.exists():
             paths.append(candidate)

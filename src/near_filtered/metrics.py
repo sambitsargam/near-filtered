@@ -263,6 +263,83 @@ def build_h4() -> dict:
 # --------------------------------------------------------------------------
 
 
+def build_diagnostics() -> dict:
+    """Figures from the probes and from the pipeline's own behaviour.
+
+    These are cited in LIMITATIONS.md and METHODOLOGY.md, so they belong in
+    metrics.json like any other number. A figure a document quotes must be
+    traceable, whether or not it supports a hypothesis.
+    """
+    out: dict = {}
+
+    def cached(name):
+        try:
+            return bq.load_cached(name)
+        except FileNotFoundError:
+            return None
+
+    coverage = cached("meta_balance_coverage")
+    if coverage is not None:
+        row = coverage.iloc[0]
+        signers = int(row.distinct_signers)
+        matched = int(row.signers_matched)
+        out["balance_table_coverage"] = {
+            "distinct_signers": signers,
+            "accounts_with_balance_row": int(row.accounts_with_balance_row),
+            "signers_matched": matched,
+            "matched_pct": round(matched / signers * 100, 2) if signers else None,
+        }
+
+    status = cached("meta_tx_status_values")
+    if status is not None:
+        out["tx_status_probe"] = {
+            "distinct_values": len(status),
+            "rows_examined": int(status.transactions.sum()),
+            "values": [str(v) for v in status.status.tolist()],
+        }
+
+    scale = cached("meta_balance_scale")
+    if scale is not None:
+        out["ft_balances_daily_probe"] = {
+            "rows_in_partition": int(scale.rows_in_partition.iloc[0]),
+            "max_liquid": float(scale.max_liquid.iloc[0]),
+        }
+
+    coverage_ft = cached("meta_ft_contract_coverage")
+    if coverage_ft is not None:
+        total = int(coverage_ft.transfers.sum())
+        top2 = coverage_ft.nlargest(2, "transfers")
+        out["ft_contract_concentration_probe"] = {
+            "top25_transfers": total,
+            "top2_contracts": [str(v) for v in top2.contract_account_id.tolist()],
+            "top2_share_pct": round(float(top2.transfers.sum()) / total * 100, 1),
+            "bridged_omft_share_pct": round(
+                float(coverage_ft[coverage_ft.is_bridged_omft].transfers.sum()) / total * 100, 1
+            ),
+        }
+
+    grid = cached("h1_economic_accounts_grid")
+    if grid is not None:
+        d, c, b = prereg.defaults()
+        headline = grid[
+            (grid.min_active_days == d)
+            & (grid.min_distinct_receivers == c)
+            & (abs(grid.min_balance_near - b) < 1e-9)
+        ].sort_values("month")
+        first = headline.iloc[0]
+        out["bot_filter_residual_automation"] = {
+            "month": str(first.month),
+            "economic_accounts": int(first.economic_accounts),
+            "economic_transactions": int(first.economic_transactions),
+            "mean_tx_per_account": round(
+                float(first.economic_transactions) / float(first.economic_accounts)
+            ),
+            "median_tx_per_account": int(first.median_tx_per_account),
+        }
+
+    return out
+
+
 def build() -> dict:
     win = W.load()
     ledger = bq.read_cost_ledger()
@@ -287,6 +364,7 @@ def build() -> dict:
             "bytes_billed": int(ledger.bytes_billed.sum()) if len(ledger) else 0,
             "est_usd": float(ledger.est_usd.sum()) if len(ledger) else 0.0,
         },
+        "diagnostics": build_diagnostics(),
         "amendments": prereg.load()["amendments"],
     }
     return metrics

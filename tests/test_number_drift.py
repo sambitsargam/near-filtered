@@ -169,3 +169,14 @@ def test_a_date_comma_is_not_read_as_a_thousands_separator(allowed):
 def test_a_real_thousands_separated_number_still_parses_whole(allowed):
     findings = drift.check_file_text("We counted 1,284,502 accounts.", allowed, "x.md")
     assert [f.number for f in findings] == ["1,284,502"]
+
+
+def test_identifiers_are_not_read_as_numbers(allowed):
+    """Regression: 'HSP-029' must not parse as the number '-029'."""
+    findings = drift.check_file_text("HSP-029 and NEP-491 and H1 and CIP-30.", allowed, "x.md")
+    assert findings == [], [f.number for f in findings]
+
+
+def test_a_real_negative_number_is_still_caught(allowed):
+    findings = drift.check_file_text("the slope was -0.2546 per month", allowed, "x.md")
+    assert [f.number for f in findings] == ["-0.2546"]
