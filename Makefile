@@ -1,0 +1,82 @@
+# NEAR, Filtered — one command per thing a reader might want to do.
+#
+#   make verify     the command for a judge: tests, then a rebuild from
+#                   committed data. No Google Cloud account, no API keys.
+#   make rebuild    regenerate results, charts, THESIS.md and the dashboard
+#                   from data/cache/. No network.
+#   make refresh    re-pull live data (needs .env). Prints a byte estimate
+#                   for every query and asks before spending anything.
+#
+# Anything that can cost money says so in its name or asks first.
+
+UV ?= uv
+RUN := $(UV) run
+
+.DEFAULT_GOAL := help
+.PHONY: help install test lint fmt verify rebuild refresh inventory sample-cost window cost clean
+
+help:
+	@echo "NEAR, Filtered"
+	@echo ""
+	@echo "  No keys needed:"
+	@echo "    make install      create the virtualenv from the pinned lockfile"
+	@echo "    make test         unit tests on the transforms"
+	@echo "    make verify       tests + number-drift check + rebuild from cache"
+	@echo "    make rebuild      regenerate results, charts, THESIS.md, dashboard"
+	@echo "    make window       print the analysis window in use"
+	@echo ""
+	@echo "  Needs .env (Google Cloud + Intents JWT):"
+	@echo "    make inventory    dataset tables, schemas and freshness (free)"
+	@echo "    make sample-cost  dry-run one metric query and price it (free)"
+	@echo "    make refresh      re-pull everything live (costs money, asks first)"
+	@echo "    make cost         total BigQuery bytes and USD spent so far"
+
+install:
+	$(UV) sync --all-groups --frozen
+
+test:
+	$(RUN) pytest
+
+lint:
+	$(RUN) ruff check src tests
+	$(RUN) ruff format --check src tests
+
+fmt:
+	$(RUN) ruff format src tests
+	$(RUN) ruff check --fix src tests
+
+# --- the judge's command -------------------------------------------------
+verify: test
+	@echo ""
+	@echo "=== number-drift check ==========================================="
+	@echo "not yet wired (lands with the generated THESIS.md)"
+	@echo ""
+	@echo "=== rebuild from committed data =================================="
+	@$(MAKE) --no-print-directory rebuild
+	@echo ""
+	@echo "=== hypothesis summary ==========================================="
+	@echo "not yet wired (lands with results/metrics.json)"
+
+rebuild:
+	@echo "rebuild: not yet wired — the pipeline stages land Nov 11-12."
+	@echo "         When it is wired this target needs no network and no keys."
+
+# --- live data -----------------------------------------------------------
+inventory:
+	$(RUN) nf inventory
+
+sample-cost:
+	$(RUN) nf sample-cost
+
+window:
+	$(RUN) nf window
+
+refresh:
+	@echo "refresh: not yet wired - lands Nov 11 with the H1-H5 queries."
+
+cost:
+	$(RUN) python scripts/cost_report.py
+
+clean:
+	rm -rf results/* .pytest_cache .ruff_cache
+	find . -name __pycache__ -type d -prune -exec rm -rf {} +

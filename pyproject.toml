@@ -1,0 +1,42 @@
+[project]
+name = "near-filtered"
+version = "0.1.0"
+description = "A pre-registered, reproducible test of whether NEAR's bot-filtered economic usage is shifting to cross-chain settlement, and whether that accrues value to NEAR holders."
+requires-python = ">=3.11"
+dependencies = [
+    "google-cloud-bigquery>=3.25",
+    "db-dtypes>=1.2",
+    "pandas>=2.2",
+    "pyarrow>=16",
+    "duckdb>=1.0",
+    "jinja2>=3.1",
+    "python-dotenv>=1.0",
+    "requests>=2.32",
+    "numpy>=1.26",
+    "scipy>=1.13",
+]
+
+[project.scripts]
+nf = "near_filtered.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.2",
+    "ruff>=0.5",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/near_filtered"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
