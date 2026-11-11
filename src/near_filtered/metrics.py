@@ -440,6 +440,63 @@ def build_diagnostics() -> dict:
     return out
 
 
+def build_exploratory() -> dict:
+    """The April 2026 break. Not pre-registered, so it carries its label in
+    its own structure and is never used as evidence for or against a
+    hypothesis. Four independent series move at the same month; this block
+    simply states each one's March and April values."""
+    out: dict = {"label": "Exploratory (not pre-registered)", "break_month": "2026-04"}
+
+    def month_value(frame, col, month):
+        rows = frame[frame.month == month]
+        return float(rows[col].iloc[0]) if len(rows) else None
+
+    try:
+        h5 = bq.load_cached("h5_value_accrual")
+        out["burn_over_issuance"] = {
+            "2026-03": month_value(h5, "burn_over_gross_issuance", "2026-03"),
+            "2026-04": month_value(h5, "burn_over_gross_issuance", "2026-04"),
+        }
+        out["burned_near"] = {
+            "2026-03": month_value(h5, "burned_near", "2026-03"),
+            "2026-04": month_value(h5, "burned_near", "2026-04"),
+        }
+    except FileNotFoundError:
+        pass
+    try:
+        h2 = bq.load_cached("h2_concentration")
+        out["top10_share"] = {
+            "2026-03": month_value(h2, "top10_share", "2026-03"),
+            "2026-04": month_value(h2, "top10_share", "2026-04"),
+        }
+        out["distinct_receivers"] = {
+            "2026-03": month_value(h2, "distinct_receivers", "2026-03"),
+            "2026-04": month_value(h2, "distinct_receivers", "2026-04"),
+        }
+        out["economic_transactions"] = None
+        grid = bq.load_cached("h1_economic_accounts_grid")
+        d, c, b = prereg.defaults()
+        headline = grid[
+            (grid.min_active_days == d)
+            & (grid.min_distinct_receivers == c)
+            & (abs(grid.min_balance_near - b) < 1e-9)
+        ]
+        out["economic_transactions"] = {
+            "2026-03": month_value(headline, "economic_transactions", "2026-03"),
+            "2026-04": month_value(headline, "economic_transactions", "2026-04"),
+        }
+    except FileNotFoundError:
+        pass
+    out["reading"] = (
+        "Four independent measures - fee burn, economic transaction volume, "
+        "receiver counts and concentration - move sharply at the same month. "
+        "That points to a real event rather than a pipeline artefact. We did "
+        "not identify the cause and we pre-registered no hypothesis about it, "
+        "so it is reported here and used as evidence for nothing."
+    )
+    return out
+
+
 def build() -> dict:
     win = W.load()
     ledger = bq.read_cost_ledger()
@@ -471,6 +528,8 @@ def build() -> dict:
             "est_usd": round(float(ledger.est_usd.sum()) if len(ledger) else 0.0, 2),
         },
         "diagnostics": build_diagnostics(),
+        "exploratory": build_exploratory(),
+        "cases": json.loads((config.ROOT / "analysis" / "cases.json").read_text()),
         "amendments": prereg.load()["amendments"],
     }
     return metrics

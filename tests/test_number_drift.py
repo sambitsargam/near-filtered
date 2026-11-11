@@ -202,3 +202,18 @@ def test_the_thesis_template_does_no_arithmetic():
         assert not re.search(r"[*/+]|(?<!\w)-(?!\w)", expression.split("|")[0]), (
             f"template expression does arithmetic: {expression.strip()!r}"
         )
+
+
+def test_html_script_and_style_blocks_are_code_not_prose(allowed):
+    html = (
+        "<style>.x { width: 960px; }</style>"
+        "<script>const h = 320; fetch('data/metrics.json')</script>"
+        "<p>prose here</p>"
+    )
+    assert drift.check_file_text(html, allowed, "index.html") == []
+
+
+def test_html_prose_is_still_checked(allowed):
+    html = "<p>Economic accounts grew 37.2% over the window.</p>"
+    findings = drift.check_file_text(html, allowed, "index.html")
+    assert [f.number for f in findings] == ["37.2%"]

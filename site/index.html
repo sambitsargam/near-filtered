@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEAR, Filtered</title>
+<meta name="description" content="A pre-registered, reproducible investment thesis on NEAR. Four of five predictions went against us; we published anyway.">
+<link rel="stylesheet" href="styles/fonts.css">
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+<a class="skip" href="#signature">Skip to the signature metric</a>
+
+<header>
+  <div class="eyebrow">NEAR, Filtered · a pre-registered thesis</div>
+  <h1>We tested five claims about NEAR.<br>
+      <span class="against">Four went against us.</span></h1>
+  <p class="sub">Bots and airdrop farming filtered out, every threshold choice published,
+     and the rejection criteria committed to git before any data was pulled.
+     Every number on this page is generated from
+     <code>results/metrics.json</code>; none is typed by hand.</p>
+  <div class="windowline" id="windowline">loading…</div>
+</header>
+
+<section aria-label="Hypothesis scoreboard">
+  <h2>Hypothesis scoreboard</h2>
+  <div class="board" id="board"></div>
+</section>
+
+<section id="signature" aria-label="Cross-chain settlement share">
+  <h2>The signature metric</h2>
+  <div class="panel sig">
+    <h3 id="h4-title">Cross-chain settlement share<span class="vw supported" id="h4-vw"></span></h3>
+    <p class="plain" id="h4-plain"></p>
+    <div class="figure" id="h4-chart" role="img" aria-label="Monthly cross-chain settlement share"></div>
+    <div class="source"><span id="h4-source"></span>
+      <span><a href="data/h4_intents_daily.csv" download>intents CSV</a> · <a href="data/h4_native_leg.csv" download>native CSV</a></span></div>
+    <details class="sql"><summary>Show SQL (native leg)</summary><pre data-sql="sql/h4_native_leg.sql">loading…</pre></details>
+    <div class="note" id="h4-note"></div>
+  </div>
+  <div class="panel">
+    <h3>Why the share rose: the decomposition</h3>
+    <p class="plain" id="h4d-plain"></p>
+    <div class="figure" id="h4d-chart" role="img" aria-label="Intents swaps and native transfers, indexed to their first month"></div>
+    <div class="source"><span>Both series indexed to their first measured month = 100. Same sampled days on both sides.</span></div>
+  </div>
+</section>
+
+<section aria-label="Evidence, one panel per hypothesis">
+  <h2>The evidence, hypothesis by hypothesis</h2>
+
+  <div class="panel against-glow" id="h1">
+    <h3>H1 — Economic accounts fell, at every threshold we pre-registered<span class="vw rejected" id="h1-vw"></span></h3>
+    <p class="plain" id="h1-plain"></p>
+    <div class="figure" id="h1-chart" role="img" aria-label="Monthly economic accounts"></div>
+    <div class="source"><span id="h1-source"></span><a href="data/h1_series.csv" download>Download CSV</a></div>
+    <details class="sql"><summary>Show SQL</summary><pre data-sql="sql/h1_accounts.sql">loading…</pre></details>
+  </div>
+
+  <div class="panel" id="h2">
+    <h3>H2 — Activity concentrated into fewer contracts<span class="vw rejected" id="h2-vw"></span></h3>
+    <p class="plain" id="h2-plain"></p>
+    <div class="cols">
+      <div class="figure" id="h2-chart-a" role="img" aria-label="Top-10 receiver share by month"></div>
+      <div class="figure" id="h2-chart-b" role="img" aria-label="HHI by month"></div>
+    </div>
+    <div class="source"><span id="h2-source"></span><a href="data/h2_concentration.csv" download>Download CSV</a></div>
+    <details class="sql"><summary>Show SQL</summary><pre data-sql="sql/h2_concentration.sql">loading…</pre></details>
+  </div>
+
+  <div class="panel" id="h3">
+    <h3>H3 — Retention drifts down, but not past the bar we set<span class="vw inconclusive" id="h3-vw"></span></h3>
+    <p class="plain" id="h3-plain"></p>
+    <div class="figure" id="h3-chart" role="img" aria-label="Cohort retention at one, three and six months"></div>
+    <div class="source"><span>Source: derived from the same per-account scan as H1; cohorts by first economic month</span><a href="data/h3_cohorts.csv" download>Download CSV</a></div>
+    <div class="note" id="h3-note"></div>
+  </div>
+
+  <div class="panel" id="h5">
+    <h3>H5 — Fee burn is a rounding error against issuance, and shrinking<span class="vw rejected" id="h5-vw"></span></h3>
+    <p class="plain" id="h5-plain"></p>
+    <div class="figure" id="h5-chart" role="img" aria-label="Burn as a share of gross issuance, with the pre-registered 10 percent bar"></div>
+    <div class="source"><span id="h5-source"></span><a href="data/h5_value_accrual.csv" download>Download CSV</a></div>
+    <details class="sql"><summary>Show SQL</summary><pre data-sql="sql/h5_value_accrual.sql">loading…</pre></details>
+    <div class="note" id="h5-note"></div>
+  </div>
+</section>
+
+<section aria-label="Sensitivity analysis">
+  <h2>Sensitivity — all 27 threshold combinations</h2>
+  <div class="panel">
+    <h3>The H1 decline survives every cell of the grid</h3>
+    <p class="plain">Change in economic accounts, first month to last, for every pre-registered
+       (d, c, b) combination. The outlined cell is the default. Tightening the filter makes the
+       decline steeper — the opposite of a threshold artefact.</p>
+    <div class="figure heat" id="heat"></div>
+    <div class="legend">
+      <span class="l1">against the prediction</span>
+      <span class="l2">flat (CI spans zero)</span>
+      <span class="l3">with the prediction</span>
+    </div>
+  </div>
+</section>
+
+<section aria-label="Exploratory finding">
+  <h2>Exploratory (not pre-registered)</h2>
+  <div class="panel">
+    <h3>Something happened in April 2026</h3>
+    <p class="plain" id="exp-plain"></p>
+    <div class="stats" id="exp-stats"></div>
+  </div>
+</section>
+
+<section aria-label="What would change our mind">
+  <h2>What would change our mind</h2>
+  <div class="panel">
+    <table class="t" id="change-table">
+      <thead><tr><th>finding</th><th>what it would mean</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p class="plain" style="margin-top:var(--s2)">Each is a quantity this pipeline already computes;
+       re-run them any month with <code>make refresh</code>.</p>
+  </div>
+</section>
+
+<section aria-label="Bull, base and bear cases">
+  <h2>Bull / base / bear — indicators, not price targets</h2>
+  <div class="casegrid" id="cases"></div>
+</section>
+
+<section aria-label="Pre-registration amendments">
+  <h2>Amendments to the pre-registration</h2>
+  <div class="panel">
+    <p class="plain">The pre-registration is frozen; changes are appended as dated amendments,
+       each with its reason, its cost, and an assessment of whether it could bias a result.
+       The original text is never edited.</p>
+    <table class="t" id="amendments"><thead><tr><th>id</th><th>what changed</th></tr></thead><tbody></tbody></table>
+  </div>
+</section>
+
+<footer>
+  <span id="provenance"></span>
+  <span>
+    <a href="https://github.com/sambitsargam/near-filtered">repository</a> ·
+    <a href="https://github.com/sambitsargam/near-filtered/blob/main/THESIS.md">THESIS.md</a> ·
+    <a href="https://github.com/sambitsargam/near-filtered/blob/main/HYPOTHESES.md">pre-registration</a> ·
+    <a href="https://github.com/sambitsargam/near-filtered/blob/main/METHODOLOGY.md">methodology</a> ·
+    <a href="https://github.com/sambitsargam/near-filtered/blob/main/LIMITATIONS.md">limitations</a> ·
+    <a href="https://github.com/sambitsargam/near-filtered/blob/main/SOURCES.md">sources</a>
+  </span>
+  <span>Verify it yourself: clone the repository and run <code>make verify</code> — no cloud account, no keys.</span>
+  <span>This is research, not investment advice.</span>
+</footer>
+
+<script src="vendor/d3.min.js"></script>
+<script src="vendor/plot.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

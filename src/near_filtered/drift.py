@@ -31,6 +31,12 @@ from . import config, prereg
 
 # Spans removed before any number is extracted.
 _FENCED_CODE = re.compile(r"```.*?```", re.DOTALL)
+# In HTML documents, script and style blocks are code: chart dimensions and
+# hex colours are not prose claims. Values those scripts RENDER come from
+# data/metrics.json at runtime, which is traceable by construction.
+_HTML_SCRIPT = re.compile(r"<script\b.*?</script>", re.DOTALL | re.IGNORECASE)
+_HTML_STYLE = re.compile(r"<style\b.*?</style>", re.DOTALL | re.IGNORECASE)
+_HTML_TAG = re.compile(r"<[^>]+>")
 _INDENTED_HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
 _INLINE_CODE = re.compile(r"`[^`\n]*`")
 _MD_LINK_TARGET = re.compile(r"\]\([^)]*\)")
@@ -84,6 +90,9 @@ def strip_non_prose(text: str) -> str:
 
     for pattern in (
         _FENCED_CODE,
+        _HTML_SCRIPT,
+        _HTML_STYLE,
+        _HTML_TAG,
         _INDENTED_HTML_COMMENT,
         _INLINE_CODE,
         _MD_LINK_TARGET,

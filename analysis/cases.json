@@ -1,0 +1,74 @@
+{
+  "note": "Bull / base / bear, written AFTER the verdicts as the pre-registration allows, under its one rule: every indicator is a quantity this pipeline already computes, so a reader can re-run them next month. Levels are analyst-chosen trigger points, not measurements, and live here so every document quotes the same ones. No price targets anywhere.",
+  "disclaimer": "This is research, not investment advice.",
+  "cases": [
+    {
+      "name": "bull",
+      "stance": "the shift becomes numerator-driven and starts paying the token",
+      "indicators": [
+        {
+          "watch": "economic accounts (H1 series, default thresholds)",
+          "confirms": "three consecutive rising months, robust across the grid",
+          "kills": "a new low below the current trough"
+        },
+        {
+          "watch": "settlement share decomposition (H4)",
+          "confirms": "share rising while native transfers are flat or growing - the strong, numerator-driven form",
+          "kills": "share rising only while native transfers keep falling"
+        },
+        {
+          "watch": "burn / gross issuance (H5a series)",
+          "confirms": "any month above the pre-registered 10% materiality bar",
+          "kills": "the ratio staying below 2% for two more quarters"
+        },
+        {
+          "watch": "a documented Intents fee path to NEAR holders (H5b)",
+          "confirms": "a primary source naming a burn, distribution or staking mechanism",
+          "kills": "another year of fee routing documented only to collectors and integrators"
+        }
+      ]
+    },
+    {
+      "name": "base",
+      "stance": "cross-chain settlement keeps growing on a shrinking native base",
+      "indicators": [
+        {
+          "watch": "Intents swaps per day (H4 intents leg)",
+          "confirms": "continued growth at roughly the measured pace",
+          "kills": "two consecutive quarters of declining swaps per day"
+        },
+        {
+          "watch": "economic accounts (H1 series)",
+          "confirms": "the decline flattening toward zero slope",
+          "kills": "re-acceleration past the window's worst monthly fall"
+        },
+        {
+          "watch": "top-10 receiver share (H2 series)",
+          "confirms": "stabilising near its current level",
+          "kills": "continued rise toward single-contract dominance"
+        }
+      ]
+    },
+    {
+      "name": "bear",
+      "stance": "the native economy keeps contracting and the bridge traffic follows it down",
+      "indicators": [
+        {
+          "watch": "economic accounts (H1 series)",
+          "confirms": "monthly falls matching or exceeding the window's average",
+          "kills": "three consecutive rising months"
+        },
+        {
+          "watch": "Intents swaps per day (H4 intents leg)",
+          "confirms": "swaps per day turning down alongside native activity",
+          "kills": "swaps per day making a new high"
+        },
+        {
+          "watch": "HHI over economic transactions (H2 series)",
+          "confirms": "new highs - activity collapsing into a handful of contracts",
+          "kills": "HHI falling back toward its early-window level"
+        }
+      ]
+    }
+  ]
+}

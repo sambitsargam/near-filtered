@@ -52,7 +52,10 @@ INTENTS_MIN_INTERVAL_S = 7.5
 INTENTS_PAGE_SIZE = 1000  # documented maximum for numberOfTransactions
 # The explorer can be slow on wide or filtered queries; a long pull must
 # tolerate that rather than abort on one slow response.
-INTENTS_TIMEOUT_S = 180.0
+# Raised from 180: the transactions endpoint intermittently takes minutes
+# for some windows while the host itself answers in under a second. A slow
+# page beats a dead run, and the page cache makes patience cheap.
+INTENTS_TIMEOUT_S = 360.0
 
 # --- Prices ---------------------------------------------------------------
 COINGECKO_BASE_URL = "https://api.coingecko.com/api/v3"

@@ -65,7 +65,8 @@ verify: test
 # Needs no network and no keys: everything comes from data/cache/.
 rebuild:
 	$(RUN) python -m near_filtered.metrics
-	$(RUN) python -c "from near_filtered import render; render.render('THESIS.md.j2', 'THESIS.md')"
+	$(RUN) python -m near_filtered.render
+	$(RUN) python scripts/build_site.py
 
 # --- live data -----------------------------------------------------------
 inventory:

@@ -65,8 +65,38 @@ def _to_float(value) -> float:
 
 
 def pull_day(client: IntentsClient, day: dt.date, page_size: int = 1000) -> pd.DataFrame:
-    """Every swap on one UTC day, reduced to the columns the metrics need."""
+    """Every swap on one UTC day, reduced to the columns the metrics need.
+
+    Pulled as one window normally. A few specific days make the server time
+    out repeatedly on the full-day query while every other day answers in
+    seconds; for those, the day is split into quarter-day windows, which the
+    server handles. The result is identical — the windows abut exactly.
+    """
     start_unix, end_unix = _day_bounds(day)
+    try:
+        return _pull_window(client, day, start_unix, end_unix, page_size)
+    except RuntimeError as exc:
+        print(f"    full-day pull failed ({str(exc)[:80]}); splitting {day} into quarters")
+        frames = []
+        span = (end_unix - start_unix) // 4
+        for i in range(4):
+            sub_start = start_unix + i * span
+            sub_end = end_unix if i == 3 else start_unix + (i + 1) * span
+            frames.append(_pull_window(client, day, sub_start, sub_end, page_size))
+        merged = pd.concat(frames, ignore_index=True)
+        # The sub-window bounds are non-inclusive on both sides, so a swap
+        # landing exactly on a boundary second could appear in two windows.
+        merged = merged.drop_duplicates()
+        return merged
+
+
+def _pull_window(
+    client: IntentsClient,
+    day: dt.date,
+    start_unix: int,
+    end_unix: int,
+    page_size: int,
+) -> pd.DataFrame:
     rows: list[dict] = []
     cursor_address: str | None = None
     cursor_memo: str | None = None
