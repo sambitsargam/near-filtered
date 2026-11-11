@@ -217,3 +217,27 @@ def test_html_prose_is_still_checked(allowed):
     html = "<p>Economic accounts grew 37.2% over the window.</p>"
     findings = drift.check_file_text(html, allowed, "index.html")
     assert [f.number for f in findings] == ["37.2%"]
+
+
+def test_metrics_floats_carry_no_false_precision():
+    """Every float in the written metrics.json survives a 12-sig-digit
+    round-trip. Sixteen-digit tails differ between macOS/ARM and Linux/x86
+    and once failed CI's byte-exact check of the committed file."""
+    import json
+
+    from near_filtered import config
+
+    if not config.METRICS_PATH.exists():
+        return
+
+    def walk(node):
+        if isinstance(node, dict):
+            for v in node.values():
+                walk(v)
+        elif isinstance(node, list):
+            for v in node:
+                walk(v)
+        elif isinstance(node, float):
+            assert node == float(f"{node:.12g}"), f"unrounded float in metrics.json: {node!r}"
+
+    walk(json.loads(config.METRICS_PATH.read_text()))

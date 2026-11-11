@@ -1,6 +1,6 @@
 # NEAR, Filtered
 
-**Generated 2026-11-11T17:05:47+00:00 from `results/metrics.json`. Not written by hand.**
+**Generated 2026-11-11T17:12:24+00:00 from `results/metrics.json`. Not written by hand.**
 
 Window: **2025-11-01 to 2026-10-31** (12 months).
 Dataset current to 2026-11-09, 1 day(s) before this run.

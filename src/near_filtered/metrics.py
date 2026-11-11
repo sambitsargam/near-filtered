@@ -547,9 +547,28 @@ def build() -> dict:
     return metrics
 
 
+def _round_floats(node, sig: int = 12):
+    """Round every float to `sig` significant digits before serialising.
+
+    Two reasons. Twelve monthly points do not carry sixteen significant
+    digits, so the trailing digits are false precision. And they are not even
+    stable: the same pipeline on macOS/ARM and Linux/x86 differs in the last
+    digit or two of a slope, which made CI's byte-exact comparison of the
+    committed file fail against a Linux rebuild. Rounding at the boundary
+    makes the file mean what it says and byte-identical across platforms.
+    """
+    if isinstance(node, dict):
+        return {k: _round_floats(v, sig) for k, v in node.items()}
+    if isinstance(node, list):
+        return [_round_floats(v, sig) for v in node]
+    if isinstance(node, float):
+        return float(f"{node:.{sig}g}")
+    return node
+
+
 def write() -> dict:
     config.ensure_dirs()
-    metrics = build()
+    metrics = _round_floats(build())
     config.METRICS_PATH.write_text(json.dumps(metrics, indent=2, default=str) + "\n")
     print(f"wrote {config.METRICS_PATH.relative_to(config.ROOT)}")
     return metrics
