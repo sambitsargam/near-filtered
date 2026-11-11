@@ -42,3 +42,5 @@ lighthouse-report.*
 
 # submission drafts stay local; the user posts and submits
 drafts/
+.vercel
+.env.local
