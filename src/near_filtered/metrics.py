@@ -232,7 +232,7 @@ def build_h5() -> dict:
         "verdict": verdict,
         # H5b is documentary and answered from primary sources, not data.
         "h5b": {
-            "question": prereg.hypothesis("H5")["parts"]["H5B" if False else "H5b"]["metric"],
+            "question": prereg.hypothesis("H5")["parts"]["H5b"]["metric"],
             "answer": "NO_DOCUMENTED_MECHANISM",
             "detail": (
                 "Every fee-related primary page we identified has been read: the "
