@@ -51,13 +51,18 @@ fmt:
 	$(RUN) ruff check --fix src tests
 
 # --- the judge's command -------------------------------------------------
-verify: test
-	@echo ""
-	@echo "=== number-drift check ==========================================="
-	@$(RUN) python -m near_filtered.drift
-	@echo ""
+# Rebuild FIRST, then test. The tests include the number-drift check against
+# the rendered documents, so they must run against what the pipeline just
+# regenerated, not against whatever happened to be committed. A fresh clone
+# once failed here because metrics.json and THESIS.md were committed out of
+# step; this ordering makes that impossible to miss locally and CI also
+# checks that the committed documents match the regenerated ones.
+verify:
 	@echo "=== rebuild from committed data =================================="
 	@$(MAKE) --no-print-directory rebuild
+	@echo ""
+	@echo "=== tests (includes the number-drift check) ======================"
+	@$(MAKE) --no-print-directory test
 	@echo ""
 	@echo "=== hypothesis summary ==========================================="
 	@$(RUN) python scripts/scoreboard.py

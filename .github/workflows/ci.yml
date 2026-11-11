@@ -15,3 +15,7 @@ jobs:
           version: "0.6.6"
       - run: make install
       - run: make verify
+      # The committed documents must be exactly what the pipeline regenerates
+      # from the committed data. A diff here means someone committed results
+      # and prose out of step, or edited a generated file by hand.
+      - run: git diff --exit-code THESIS.md README.md results/metrics.json

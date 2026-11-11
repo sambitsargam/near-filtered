@@ -1,6 +1,6 @@
 # NEAR, Filtered
 
-**Generated 2026-11-10T16:50:55+00:00 from `results/metrics.json`. Not written by hand.**
+**Generated 2026-11-11T06:09:12+00:00 from `results/metrics.json`. Not written by hand.**
 
 Window: **2025-11-01 to 2026-10-31** (12 months).
 Dataset current to 2026-11-09, 1 day(s) before this run.
@@ -25,7 +25,7 @@ count as rejected, and committed that file before pulling any data.
 | H1 | Real usage | growing or flat | **REJECTED** |
 | H2 | Concentration | less concentrated | **REJECTED** |
 | H3 | Retention | newer cohorts hold up | **INCONCLUSIVE** |
-| H4 | Cross-chain shift | share rising | **SUPPORTED** (provisional, 5/12 months) |
+| H4 | Cross-chain shift | share rising | **SUPPORTED** (provisional, 8/12 months) |
 | H5 | Value accrual | burn material, trending neutral | **REJECTED** |
 
 One rule produced every row: fit an ordinary least-squares trend on the
@@ -92,22 +92,22 @@ That distribution is not a population of humans.
 ## Evidence for the thesis
 
 > **Incomplete measurement.** This verdict rests on
-> 5 of 12 months. The Intents
+> 8 of 12 months. The Intents
 > leg is still being pulled, and the months not yet measured are the later
 > ones. Treat H4 as provisional until this notice disappears from a
 > regenerated copy of this document.
 
 **The cross-chain shift is real.** The settlement share rose from
 1.73% to
-4.49% across
-5 measured months, with a slope of
-0.839% per month and a 95% interval of
-[0.078%, 1.599%].
+9.45% across
+8 measured months, with a slope of
+1.154% per month and a 95% interval of
+[0.854%, 1.454%].
 
 **But read the decomposition before using that number.** Over the same months
-Intents swaps grew +32.8%
+Intents swaps grew +39.5%
 while native transfers by economic accounts fell
--50.4%. The ratio is driven
+-76.5%. The ratio is driven
 by **both**. A share that rises partly because
 its denominator is collapsing is a different claim from one that rises because
 its numerator is growing, and we are not going to let the first be read as the
@@ -140,7 +140,7 @@ next month with `make refresh`.
 Of the economic activity NEAR settles in a month, what fraction is settled
 across chains through NEAR Intents rather than natively on NEAR?
 
-Measured on 22 sampled days, the same days on both sides
+Measured on 33 sampled days, the same days on both sides
 of the ratio so the two legs always cover identical periods.
 
 | month | Intents swaps | native transfers | share |
@@ -150,11 +150,14 @@ of the ratio so the two legs always cover identical periods.
 | 2026-01 | 90,683 | 2,107,840 | 4.12% |
 | 2026-02 | 83,468 | 1,762,538 | 4.52% |
 | 2026-03 | 80,087 | 1,703,733 | 4.49% |
+| 2026-04 | 71,003 | 1,040,002 | 6.39% |
+| 2026-05 | 73,803 | 757,778 | 8.88% |
+| 2026-06 | 84,130 | 805,924 | 9.45% |
 
 Two caveats travel with every one of these numbers. The Intents Explorer API
 covers **1Click swaps only**, so the numerator is a lower bound on Intents
 activity. And a sender is identifiable on only
-48.9% of swaps, so unique-swapper counts cover
+62.8% of swaps, so unique-swapper counts cover
 part of the sample rather than all of it.
 
 The value form of this metric is **not computed**: native token coverage is

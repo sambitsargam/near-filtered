@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-11T05:57:58+00:00",
+  "generated_at_utc": "2026-11-11T06:09:12+00:00",
   "window": {
     "start": "2025-11-01",
     "end": "2026-10-31",
@@ -803,8 +803,8 @@
         "both_legs_same_days": true,
         "reported_as": "per-day rate with a confidence interval across the four sampled days"
       },
-      "months_complete": 7,
-      "months_total": 8,
+      "months_complete": 8,
+      "months_total": 9,
       "months_expected": 12,
       "is_partial": true,
       "series": {
@@ -836,6 +836,10 @@
           {
             "month": "2026-05",
             "value": 0.08875022397096614
+          },
+          {
+            "month": "2026-06",
+            "value": 0.09452235482341521
           }
         ],
         "intents_swaps": [
@@ -866,6 +870,10 @@
           {
             "month": "2026-05",
             "value": 73803.0
+          },
+          {
+            "month": "2026-06",
+            "value": 84130.0
           }
         ],
         "native_transfers": [
@@ -896,6 +904,10 @@
           {
             "month": "2026-05",
             "value": 757778.0
+          },
+          {
+            "month": "2026-06",
+            "value": 805924.0
           }
         ],
         "intents_usd": [
@@ -926,6 +938,10 @@
           {
             "month": "2026-05",
             "value": 151083335.84350002
+          },
+          {
+            "month": "2026-06",
+            "value": 176935074.13864234
           }
         ],
         "bridged_transfers": [
@@ -956,32 +972,36 @@
           {
             "month": "2026-05",
             "value": 52796.0
+          },
+          {
+            "month": "2026-06",
+            "value": 105640.0
           }
         ]
       },
       "trend": {
-        "n": 7,
-        "slope_per_month": 0.011168360819480434,
-        "ci_low": 0.007005216518665052,
-        "ci_high": 0.015331505120295815,
-        "p_value": 0.0009820204431072494,
-        "r_squared": 0.9048620942478288,
+        "n": 8,
+        "slope_per_month": 0.011537981986876753,
+        "ci_low": 0.008538442313351886,
+        "ci_high": 0.01453752166040162,
+        "p_value": 8.172827876660127e-05,
+        "r_squared": 0.9365686812715955,
         "first": 0.01725100871463061,
-        "last": 0.08875022397096614,
-        "total_change_pct": 414.4639681023228,
+        "last": 0.09452235482341521,
+        "total_change_pct": 447.9236396376674,
         "direction": "up"
       },
       "verdict": "SUPPORTED",
       "decomposition": {
         "intents_swaps_first": 60293.0,
-        "intents_swaps_last": 73803.0,
-        "intents_growth_pct": 22.407244622095423,
+        "intents_swaps_last": 84130.0,
+        "intents_growth_pct": 39.53526943426269,
         "native_transfers_first": 3434749.0,
-        "native_transfers_last": 757778.0,
-        "native_growth_pct": -77.93789298723138,
+        "native_transfers_last": 805924.0,
+        "native_growth_pct": -76.53616028420126,
         "driven_by": "both"
       },
-      "sender_coverage_mean": 0.6019407124621569,
+      "sender_coverage_mean": 0.6280766423075831,
       "value_form": {
         "computed": false,
         "native_token_coverage_pct": 0.0,
@@ -1074,18 +1094,30 @@
         },
         {
           "month": "2026-06",
-          "days_sampled": 3,
-          "swaps_per_day": 22012.6666666667,
-          "swaps_per_day_sd": 5867.2661720203,
-          "usd_per_day": 49824194.909212895,
-          "usd_per_day_sd": 33266237.134629626,
-          "unique_senders_per_day": 10715.6666666667,
-          "sender_coverage": 0.7841124115,
-          "swaps_per_day_se": 3387.4677038231,
-          "usd_per_day_se": 19206270.96460434
+          "days_sampled": 4,
+          "swaps_per_day": 21032.5,
+          "swaps_per_day_sd": 5176.1744239029,
+          "usd_per_day": 44233768.534660585,
+          "usd_per_day_sd": 29373000.475415647,
+          "unique_senders_per_day": 10708.0,
+          "sender_coverage": 0.8110281512,
+          "swaps_per_day_se": 2588.0872119515,
+          "usd_per_day_se": 14686500.237707824
+        },
+        {
+          "month": "2026-07",
+          "days_sampled": 1,
+          "swaps_per_day": 16751.0,
+          "swaps_per_day_sd": null,
+          "usd_per_day": 22247637.017348405,
+          "usd_per_day_sd": null,
+          "unique_senders_per_day": 9970.0,
+          "sender_coverage": 0.9050802937,
+          "swaps_per_day_se": null,
+          "usd_per_day_se": null
         }
       ],
-      "days_sampled": 31
+      "days_sampled": 33
     },
     "H5": {
       "id": "H5",
