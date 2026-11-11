@@ -18,4 +18,4 @@ jobs:
       # The committed documents must be exactly what the pipeline regenerates
       # from the committed data. A diff here means someone committed results
       # and prose out of step, or edited a generated file by hand.
-      - run: git diff --exit-code THESIS.md README.md results/metrics.json
+      - run: git diff --exit-code -I '"generated_at_utc": ' -I '^\*\*Generated ' THESIS.md README.md results/metrics.json
