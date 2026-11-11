@@ -39,3 +39,6 @@ site/.vite/
 # --- generated artifacts that are rebuilt by `make rebuild` ---
 .playwright/
 lighthouse-report.*
+
+# submission drafts stay local; the user posts and submits
+drafts/

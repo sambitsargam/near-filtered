@@ -245,6 +245,13 @@ fetch("data/metrics.json").then((r) => r.json()).then((m) => {
     } catch { pre.textContent = "SQL unavailable offline"; }
   });
 
+  /* Deep links: the browser's native anchor jump fires before the charts
+     exist, so a link to #h1 lands on an empty page. Re-run the jump once
+     everything is rendered. */
+  if (location.hash) {
+    const target = document.querySelector(location.hash);
+    if (target) target.scrollIntoView({ behavior: "instant", block: "start" });
+  }
 }).catch((err) => {
   document.getElementById("windowline").textContent = "failed to load data/metrics.json — " + err;
 });
