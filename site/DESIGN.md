@@ -55,10 +55,27 @@ scoreboard, one real evidence panel (H1) and the real 27-cell heatmap, all
 from `data/metrics.json`. Serve with `python3 -m http.server -d site` or
 `make site-preview`.
 
-## Still to build on this system
+## Motion
 
-The full one-page dashboard: evidence panels for all five hypotheses, the
-settlement-share signature chart, the April-2026 exploratory panel, bull /
-base / bear indicators, "what would change our mind", the 3D hero (lazy,
-with a static poster fallback and `prefers-reduced-motion` honoured), and the
-og:image social card generated from the data.
+Motion is decoration on top of a page that is complete without it. An inline
+script adds `html.motion` only when the reader has not asked for reduced
+motion and `IntersectionObserver` exists; every hidden-until-revealed rule is
+scoped under that class, so without it each element renders in its final
+state.
+
+- **Hero field** — a canvas of dots streaming into a dashed "bot filter"
+  line; most turn coral and fall away, a few pass and brighten. It encodes no
+  data and draws no numbers. Paused off-screen and in background tabs; one
+  still frame under reduced motion.
+- **Intro** — headline words rise in sequence; the animations are removed
+  once played (`html.settled`) so no composited layer holds the text.
+- **Counters** — hero stats count up from a dash to the value in
+  `metrics.json` when they enter the viewport.
+- **Charts** — lines draw in once on first view (stroke-dash), then areas,
+  dots and labels fade in; inline styles are cleared afterwards. Resizes
+  re-render without animating. Crosshair tooltips on every series.
+- **Sections** — fade-and-rise reveal; cards, heatmap cells and timeline
+  items stagger. Scoreboard cards tilt and carry a cursor spotlight on
+  fine pointers only.
+- **Chrome** — scroll progress bar, scroll-spy nav, back-to-top, and a
+  bull/base/bear focus switcher.
