@@ -124,16 +124,20 @@ class IntentsClient:
         self.cache_dir = cache_dir or config.INTENTS_RAW_DIR
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.limiter = RateLimiter()
-        self.session = requests.Session()
-        self.session.headers.update(
+        self.session = self._new_session()
+        self.requests_made = 0
+        self.pages_from_cache = 0
+
+    def _new_session(self) -> requests.Session:
+        session = requests.Session()
+        session.headers.update(
             {
                 "Authorization": f"Bearer {self.jwt}",
                 "Accept": "application/json",
                 "User-Agent": "near-filtered/0.1 (research pipeline)",
             }
         )
-        self.requests_made = 0
-        self.pages_from_cache = 0
+        return session
 
     # -- low level --------------------------------------------------------
     def _cache_file(self, params: dict) -> Path:
@@ -163,7 +167,17 @@ class IntentsClient:
                 # A single slow response must not end a pull that is hundreds
                 # of requests long. Back off and try the same page again; the
                 # page cache means nothing already fetched is re-fetched.
+                #
+                # After two consecutive connection-level failures the session
+                # is rebuilt. A long-running process whose machine slept keeps
+                # a pool of dead sockets, and curl succeeding while the pull
+                # fails was the signature: the server was fine, our pool was
+                # not.
                 self.requests_made += 1
+                if attempt >= 2:
+                    self.session.close()
+                    self.session = self._new_session()
+                    print("    rebuilt the HTTP session (stale connection pool)")
                 wait = min(backoff * 2**attempt, 120)
                 print(
                     f"    {type(exc).__name__} after {timeout:.0f}s; "

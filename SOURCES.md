@@ -80,10 +80,17 @@ than our assuming them.
 | 0.1% withdrawal fee on NEAR, ZEC and STRK withdrawn to Solana; destination not stated | <https://docs.near-intents.org/resources/fees.md> | PRIMARY |
 | **No primary page we read names any mechanism by which Intents fees are burned, staked, or routed to NEAR token holders.** The pages checked were the fees page, the fee-config page, the FAQs, the authentication page and the NEAR-token wrapping page. | the pages above | PRIMARY (an absence, recorded as an absence) |
 
-**Not yet read.** `https://docs.near-intents.org/security-compliance/treasury-addresses.md`
-may describe what the `fee_collector` does with collected fees. H5b is not
-final until this page is read; the pre-registration already commits us to how
-we will report either answer.
+**Closed 2026-11-11.** The treasury-addresses page
+(<https://docs.near-intents.org/security-compliance/treasury-addresses.md>)
+lists NEAR Intents and HOT Bridge treasury and refill addresses per network,
+stated as published for transparency and AML compliance, with `intents.near`
+as the NEAR-side treasury. It states no use for the funds and describes no
+burn, staking or distribution mechanism. With that, every fee-related primary
+page we identified has been read, and none names a mechanism by which Intents
+fees reach NEAR token holders. H5b is final: the pre-registered reading of a
+null applies, and it counts as evidence against the claim's second clause.
+Absence on these pages does not prove no mechanism exists anywhere; it proves
+none is documented where the project documents its fees and treasuries.
 
 ---
 

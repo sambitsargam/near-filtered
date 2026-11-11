@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-11T17:03:53+00:00",
+  "generated_at_utc": "2026-11-11T17:05:47+00:00",
   "window": {
     "start": "2025-11-01",
     "end": "2026-10-31",
@@ -1468,7 +1468,8 @@
       "verdict": "REJECTED",
       "h5b": {
         "question": "documentary: does any portion of NEAR Intents fees accrue to NEAR token holders",
-        "answer": "PENDING"
+        "answer": "NO_DOCUMENTED_MECHANISM",
+        "detail": "Every fee-related primary page we identified has been read: the fees page, the 1Click fee configuration, the FAQs, the authentication page, the NEAR-token page and the treasury-addresses page. The protocol fee goes to a fee collector, 1Click keeps its share, the near-intents.org front end routes its fee to a DAO account, and the treasury pages list addresses for transparency and AML compliance with no stated use. None names a burn, staking or distribution mechanism reaching NEAR holders. Per the pre-registration, this null counts as evidence against the claim's second clause. Citations: SOURCES.md section 3."
       }
     }
   },

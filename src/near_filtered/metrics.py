@@ -232,8 +232,20 @@ def build_h5() -> dict:
         "verdict": verdict,
         # H5b is documentary and answered from primary sources, not data.
         "h5b": {
-            "question": prereg.hypothesis("H5")["parts"]["H5b"]["metric"],
-            "answer": MISSING,
+            "question": prereg.hypothesis("H5")["parts"]["H5B" if False else "H5b"]["metric"],
+            "answer": "NO_DOCUMENTED_MECHANISM",
+            "detail": (
+                "Every fee-related primary page we identified has been read: the "
+                "fees page, the 1Click fee configuration, the FAQs, the "
+                "authentication page, the NEAR-token page and the treasury-addresses "
+                "page. The protocol fee goes to a fee collector, 1Click keeps its "
+                "share, the near-intents.org front end routes its fee to a DAO "
+                "account, and the treasury pages list addresses for transparency and "
+                "AML compliance with no stated use. None names a burn, staking or "
+                "distribution mechanism reaching NEAR holders. Per the "
+                "pre-registration, this null counts as evidence against the claim's "
+                "second clause. Citations: SOURCES.md section 3."
+            ),
         },
     }
 
