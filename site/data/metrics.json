@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-11T06:09:12+00:00",
+  "generated_at_utc": "2026-11-11T17:03:53+00:00",
   "window": {
     "start": "2025-11-01",
     "end": "2026-10-31",
@@ -803,10 +803,10 @@
         "both_legs_same_days": true,
         "reported_as": "per-day rate with a confidence interval across the four sampled days"
       },
-      "months_complete": 8,
-      "months_total": 9,
+      "months_complete": 12,
+      "months_total": 12,
       "months_expected": 12,
-      "is_partial": true,
+      "is_partial": false,
       "series": {
         "settlement_share_count": [
           {
@@ -840,6 +840,22 @@
           {
             "month": "2026-06",
             "value": 0.09452235482341521
+          },
+          {
+            "month": "2026-07",
+            "value": 0.12278554888265528
+          },
+          {
+            "month": "2026-08",
+            "value": 0.22287854896169665
+          },
+          {
+            "month": "2026-09",
+            "value": 0.20872571909097082
+          },
+          {
+            "month": "2026-10",
+            "value": 0.10727516179424236
           }
         ],
         "intents_swaps": [
@@ -874,6 +890,22 @@
           {
             "month": "2026-06",
             "value": 84130.0
+          },
+          {
+            "month": "2026-07",
+            "value": 65220.0
+          },
+          {
+            "month": "2026-08",
+            "value": 106856.0
+          },
+          {
+            "month": "2026-09",
+            "value": 79924.0
+          },
+          {
+            "month": "2026-10",
+            "value": 67298.0
           }
         ],
         "native_transfers": [
@@ -908,6 +940,22 @@
           {
             "month": "2026-06",
             "value": 805924.0
+          },
+          {
+            "month": "2026-07",
+            "value": 465950.0
+          },
+          {
+            "month": "2026-08",
+            "value": 372580.0
+          },
+          {
+            "month": "2026-09",
+            "value": 302990.0
+          },
+          {
+            "month": "2026-10",
+            "value": 560042.0
           }
         ],
         "intents_usd": [
@@ -942,6 +990,22 @@
           {
             "month": "2026-06",
             "value": 176935074.13864234
+          },
+          {
+            "month": "2026-07",
+            "value": 86324169.21913445
+          },
+          {
+            "month": "2026-08",
+            "value": 178800712.4114437
+          },
+          {
+            "month": "2026-09",
+            "value": 138325509.22717297
+          },
+          {
+            "month": "2026-10",
+            "value": 145592718.18954772
           }
         ],
         "bridged_transfers": [
@@ -976,32 +1040,48 @@
           {
             "month": "2026-06",
             "value": 105640.0
+          },
+          {
+            "month": "2026-07",
+            "value": 8023.0
+          },
+          {
+            "month": "2026-08",
+            "value": 4513.0
+          },
+          {
+            "month": "2026-09",
+            "value": 18728.0
+          },
+          {
+            "month": "2026-10",
+            "value": 13412.0
           }
         ]
       },
       "trend": {
-        "n": 8,
-        "slope_per_month": 0.011537981986876753,
-        "ci_low": 0.008538442313351886,
-        "ci_high": 0.01453752166040162,
-        "p_value": 8.172827876660127e-05,
-        "r_squared": 0.9365686812715955,
+        "n": 12,
+        "slope_per_month": 0.01591664368977583,
+        "ci_low": 0.00877491485352485,
+        "ci_high": 0.023058372526026813,
+        "p_value": 0.0005651507486586496,
+        "r_squared": 0.7114771666714816,
         "first": 0.01725100871463061,
-        "last": 0.09452235482341521,
-        "total_change_pct": 447.9236396376674,
+        "last": 0.10727516179424236,
+        "total_change_pct": 521.8486325571334,
         "direction": "up"
       },
       "verdict": "SUPPORTED",
       "decomposition": {
         "intents_swaps_first": 60293.0,
-        "intents_swaps_last": 84130.0,
-        "intents_growth_pct": 39.53526943426269,
+        "intents_swaps_last": 67298.0,
+        "intents_growth_pct": 11.6182641434329,
         "native_transfers_first": 3434749.0,
-        "native_transfers_last": 805924.0,
-        "native_growth_pct": -76.53616028420126,
+        "native_transfers_last": 560042.0,
+        "native_growth_pct": -83.69482020374706,
         "driven_by": "both"
       },
-      "sender_coverage_mean": 0.6280766423075831,
+      "sender_coverage_mean": 0.702109135281885,
       "value_form": {
         "computed": false,
         "native_token_coverage_pct": 0.0,
@@ -1106,18 +1186,54 @@
         },
         {
           "month": "2026-07",
-          "days_sampled": 1,
-          "swaps_per_day": 16751.0,
-          "swaps_per_day_sd": null,
-          "usd_per_day": 22247637.017348405,
-          "usd_per_day_sd": null,
-          "unique_senders_per_day": 9970.0,
-          "sender_coverage": 0.9050802937,
-          "swaps_per_day_se": null,
-          "usd_per_day_se": null
+          "days_sampled": 4,
+          "swaps_per_day": 16305.0,
+          "swaps_per_day_sd": 1170.3723054368,
+          "usd_per_day": 21581042.304783612,
+          "usd_per_day_sd": 1234149.6065840912,
+          "unique_senders_per_day": 9905.75,
+          "sender_coverage": 0.8718937721,
+          "swaps_per_day_se": 585.1861527184,
+          "usd_per_day_se": 617074.8032920456
+        },
+        {
+          "month": "2026-08",
+          "days_sampled": 4,
+          "swaps_per_day": 26714.0,
+          "swaps_per_day_sd": 3736.3931805954,
+          "usd_per_day": 44700178.10286093,
+          "usd_per_day_sd": 15494114.302180063,
+          "unique_senders_per_day": 16788.5,
+          "sender_coverage": 0.874182014,
+          "swaps_per_day_se": 1868.1965902977,
+          "usd_per_day_se": 7747057.1510900315
+        },
+        {
+          "month": "2026-09",
+          "days_sampled": 4,
+          "swaps_per_day": 19981.0,
+          "swaps_per_day_sd": 6355.6016762118,
+          "usd_per_day": 34581377.30679324,
+          "usd_per_day_sd": 6085897.957145711,
+          "unique_senders_per_day": 11784.5,
+          "sender_coverage": 0.8200463989,
+          "swaps_per_day_se": 3177.8008381059,
+          "usd_per_day_se": 3042948.9785728557
+        },
+        {
+          "month": "2026-10",
+          "days_sampled": 4,
+          "swaps_per_day": 16824.5,
+          "swaps_per_day_sd": 1648.5930365011,
+          "usd_per_day": 36398179.54738693,
+          "usd_per_day_sd": 6954493.592273971,
+          "unique_senders_per_day": 10479.25,
+          "sender_coverage": 0.8345742999,
+          "swaps_per_day_se": 824.2965182506,
+          "usd_per_day_se": 3477246.7961369855
         }
       ],
-      "days_sampled": 33
+      "days_sampled": 48
     },
     "H5": {
       "id": "H5",

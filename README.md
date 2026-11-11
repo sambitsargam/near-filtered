@@ -26,7 +26,7 @@ Window **2025-11-01 to 2026-10-31**; dataset current to
 | H1 | Real usage — bot-filtered economic accounts | **REJECTED** — fell 69.6%, down in 23 of 27 sensitivity cells |
 | H2 | Concentration | **REJECTED** — top-10 receiver share 14.8% → 62.2% |
 | H3 | Retention | **INCONCLUSIVE** — the 95% interval spans zero |
-| H4 | Cross-chain shift | **SUPPORTED** (provisional, 8/12 months) — share 1.73% → 9.45% |
+| H4 | Cross-chain shift | **SUPPORTED** — share 1.73% → 10.73% |
 | H5 | Value accrual | **REJECTED** — burn is 1.42% of issuance against a 10% bar |
 
 Full results: [THESIS.md](THESIS.md). Frozen pre-registration:
@@ -71,10 +71,10 @@ Of the economic activity NEAR settles in a month, what fraction settles
 Both legs are measured on the same sampled days; the headline form counts
 transfers so it needs no token pricing at all.
 It rose from 1.73% to
-9.45% — but the
+10.73% — but the
 decomposition matters: Intents swaps grew
-+39.5% while native
-transfers fell -76.5%.
++11.6% while native
+transfers fell -83.7%.
 Part of the rise is a shrinking denominator, and the thesis says so in its
 headline rather than a footnote.
 
