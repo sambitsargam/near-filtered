@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>og card</title>
+<link rel="stylesheet" href="styles/fonts.css">
+<link rel="stylesheet" href="styles/tokens.css">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    background: var(--bg); color: var(--text); font-family: var(--font-body);
+    padding: 56px 64px; display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .eyebrow { font-family: var(--font-mono); font-size: 16px; letter-spacing: 0.22em; color: var(--cobalt-soft); text-transform: uppercase; }
+  h1 { font-family: var(--font-display); font-weight: 700; font-size: 74px; line-height: 1.02; letter-spacing: -0.02em; margin-top: 18px; }
+  h1 .against { color: var(--coral); }
+  .row { display: flex; gap: 14px; }
+  .pill {
+    flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 18px 20px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .pill .hid { font-family: var(--font-mono); font-size: 14px; color: var(--text-faint); }
+  .pill .v { font-family: var(--font-mono); font-size: 15px; letter-spacing: 0.04em; }
+  .v.r { color: var(--coral); } .v.s { color: var(--lime); } .v.i { color: var(--amber); }
+  .foot { font-family: var(--font-mono); font-size: 15px; color: var(--text-muted); display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+<div>
+  <div class="eyebrow">NEAR, Filtered · a pre-registered on-chain thesis</div>
+  <h1>We tested five claims about NEAR.<br><span class="against">Four went against us.</span></h1>
+</div>
+<div class="row" id="row"></div>
+<div class="foot"><span id="win"></span><span>every number generated · make verify</span></div>
+<script>
+fetch("data/metrics.json").then(r => r.json()).then(m => {
+  const names = { H1: "Real usage", H2: "Concentration", H3: "Retention", H4: "Cross-chain", H5: "Value accrual" };
+  const cls = { REJECTED: "r", SUPPORTED: "s", INCONCLUSIVE: "i", PENDING: "i" };
+  const glyph = { REJECTED: "✕", SUPPORTED: "✓", INCONCLUSIVE: "~", PENDING: "~" };
+  document.getElementById("row").innerHTML = ["H1","H2","H3","H4","H5"].map(hid => {
+    const v = m.scoreboard[hid];
+    return `<div class="pill"><span class="hid">${hid} · ${names[hid]}</span>
+            <span class="v ${cls[v]}">${glyph[v]} ${v}</span></div>`;
+  }).join("");
+  document.getElementById("win").textContent = `window ${m.window.start} .. ${m.window.end}`;
+  document.title = "og-ready";
+});
+</script>
+</body>
+</html>

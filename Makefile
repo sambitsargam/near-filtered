@@ -84,6 +84,15 @@ refresh:
 cost:
 	$(RUN) python scripts/cost_report.py
 
+# Regenerate the og:image social card from the live scoreboard. Needs Chrome;
+# the card is data-driven, so rerun this whenever the verdicts change.
+og:
+	@python3 -m http.server 8129 --directory site & SERVER=$$!; sleep 1; \
+	"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless \
+	  --disable-gpu --screenshot=site/og.png --window-size=1200,630 \
+	  --hide-scrollbars --virtual-time-budget=4000 http://localhost:8129/og.html; \
+	kill $$SERVER; ls -la site/og.png
+
 clean:
 	rm -rf results/* .pytest_cache .ruff_cache
 	find . -name __pycache__ -type d -prune -exec rm -rf {} +
