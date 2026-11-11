@@ -52,8 +52,7 @@ direction; the pre-registered default cell is outlined.
 
 [`design-sample.html`](design-sample.html) renders the hero, the live
 scoreboard, one real evidence panel (H1) and the real 27-cell heatmap, all
-from `data/metrics.json`. Serve with `python3 -m http.server -d site` or
-`make site-preview`.
+from `data/metrics.json`. Serve with `python3 -m http.server -d site`.
 
 ## Motion
 

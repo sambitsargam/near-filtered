@@ -68,7 +68,7 @@ figure in THESIS.md and rerun.
 | Methods and limits | `METHODOLOGY.md`, `LIMITATIONS.md` |
 | Sources with reliability labels | `SOURCES.md` |
 | Live refresh + monthly CI | `make refresh`, `.github/workflows/` |
-| Dashboard | `site/` *(see its README for the live URL)* |
+| Dashboard | [near-filtered.vercel.app](https://near-filtered.vercel.app) — static files from `site/` |
 
 ## What to attack first
 

@@ -16,6 +16,10 @@ against us, and this repository reports that.**
 Every number in this thesis is generated from the data. `make verify`
 checks it.
 
+**Live dashboard: [near-filtered.vercel.app](https://near-filtered.vercel.app)**
+— the same `results/metrics.json`, drawn as charts, served as static files
+from `site/`.
+
 ## 1. Verdicts
 
 Window **2025-11-01 to 2026-10-31**; dataset current to
