@@ -119,8 +119,9 @@ hackathon rules (Q-005), AI-assisted code is included in this listing.
 
 ## 8. Also submitted at NEAR HACKATHON by the same team
 
-**Proving Ground** — `PROVING_GROUND_REPO_URL` *(link to be filled in
-before submission)*. The two projects are independent.
+**Proving Ground** —
+[github.com/sambitsargam/proving-ground](https://github.com/sambitsargam/proving-ground).
+The two projects are independent.
 
 ## 9. License
 
