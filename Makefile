@@ -13,7 +13,7 @@ UV ?= uv
 RUN := $(UV) run
 
 .DEFAULT_GOAL := help
-.PHONY: help install env test lint fmt verify rebuild refresh inventory sample-cost window cost clean
+.PHONY: help install env test lint fmt verify rebuild refresh refresh-plan inventory sample-cost window cost clean
 
 help:
 	@echo "NEAR, Filtered"
@@ -29,6 +29,7 @@ help:
 	@echo "  Needs .env (Google Cloud + Intents JWT):"
 	@echo "    make inventory    dataset tables, schemas and freshness (free)"
 	@echo "    make sample-cost  dry-run one metric query and price it (free)"
+	@echo "    make refresh-plan price every query a refresh would run (free)"
 	@echo "    make refresh      re-pull everything live (costs money, asks first)"
 	@echo "    make cost         total BigQuery bytes and USD spent so far"
 
@@ -83,8 +84,15 @@ sample-cost:
 window:
 	$(RUN) nf window
 
+# Dry-runs every query against the committed window. Spends nothing.
+refresh-plan:
+	$(RUN) nf refresh --plan
+
+# Prices the run, asks, pulls, then rebuilds. Stops before the rebuild if the
+# refresh was refused or declined, so a partial pull never renders.
 refresh:
-	@echo "refresh: not yet wired - lands Nov 11 with the H1-H5 queries."
+	$(RUN) nf refresh
+	@$(MAKE) --no-print-directory rebuild
 
 cost:
 	$(RUN) python scripts/cost_report.py

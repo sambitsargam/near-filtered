@@ -105,11 +105,19 @@ Everything we know to be wrong or unmeasurable: [LIMITATIONS.md](LIMITATIONS.md)
 
 ## 6. Rerunning it live
 
-`make refresh` re-pulls everything (needs `.env`; see `.env.example`), with
-dry-run byte estimates printed before anything is spent. CI reruns
-`make verify` on every push with no secrets, and a monthly workflow can
-rerun the refresh with repository secrets (`GCP_SA_KEY`, `INTENTS_JWT`) —
-see `.github/workflows/`.
+`make refresh-plan` dry-runs every query a refresh would execute and prints
+the bill, query by query. It is free and needs only `.env` (see
+`.env.example`). `make refresh` shows the same plan, asks before spending,
+re-derives the window from the dataset, re-pulls, and rebuilds. Months
+already pulled are reused rather than billed again, because chain history
+for a closed month does not change. A refresh is refused outright if any
+query would pass the per-query byte cap or the whole run would pass
+`--max-total-gib`.
+
+CI reruns `make verify` on every push with no secrets. A monthly workflow
+runs the same refresh with `--yes` and repository secrets (`GCP_SA_KEY`,
+`GCP_PROJECT_ID`, `INTENTS_JWT`), then opens a pull request so a person
+reviews any changed verdict before it publishes. See `.github/workflows/`.
 
 ## 7. Built with
 

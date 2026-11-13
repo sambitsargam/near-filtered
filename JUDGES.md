@@ -67,7 +67,7 @@ figure in THESIS.md and rerun.
 | What would change our minds | `THESIS.md`, its own section |
 | Methods and limits | `METHODOLOGY.md`, `LIMITATIONS.md` |
 | Sources with reliability labels | `SOURCES.md` |
-| Live refresh + monthly CI | `make refresh`, `.github/workflows/` |
+| Live refresh + monthly CI | `make refresh-plan` (free), `make refresh`, `src/near_filtered/refresh.py`, `.github/workflows/refresh.yml` |
 | Dashboard | [near-filtered.vercel.app](https://near-filtered.vercel.app) — static files from `site/` |
 
 ## What to attack first

@@ -36,6 +36,69 @@ def month_windows(window: Window) -> list[tuple[str, dt.date, dt.date]]:
     return out
 
 
+def h1_params(start: dt.date, end: dt.date) -> dict:
+    """Parameters for sql/h1_accounts.sql over one 30-day window."""
+    grid = prereg.load()["bot_filter"]["grid"]
+    return {
+        "window_start": start,
+        "window_end": end,
+        "loosest_days": min(grid["min_active_days"]),
+        "loosest_receivers": min(grid["min_distinct_receivers"]),
+        "loosest_balance": min(grid["min_balance_near"]),
+        "success_status": None,
+    }
+
+
+def h2_params(start: dt.date, end: dt.date) -> dict:
+    """Parameters for sql/h2_concentration.sql over one 30-day window."""
+    d, c, b = prereg.defaults()
+    return {
+        "window_start": start,
+        "window_end": end,
+        "min_active_days": d,
+        "min_distinct_receivers": c,
+        "min_balance_near": b,
+    }
+
+
+def h1_month_path(month: str):
+    from . import config
+
+    return config.RAW_DIR / f"h1_accounts_{month}.parquet"
+
+
+def h1_combined_path():
+    from . import config
+
+    return config.RAW_DIR / "h1_accounts.parquet"
+
+
+def h2_month_path(month: str):
+    from . import config
+
+    return config.RAW_DIR / f"h2_{month}.parquet"
+
+
+def split_h1_combined() -> int:
+    """Split a combined per-account file into per-month files, if needed.
+
+    An earlier pull wrote only the combined file. The per-month files are
+    what lets a refresh skip months it already holds, so this recovers them
+    without querying anything. Returns how many month files were written.
+    """
+    combined = h1_combined_path()
+    if not combined.exists():
+        return 0
+    written = 0
+    accounts = pd.read_parquet(combined)
+    for month, frame in accounts.groupby("month", sort=True):
+        path = h1_month_path(month)
+        if not path.exists():
+            frame.to_parquet(path, index=False)
+            written += 1
+    return written
+
+
 def h1_accounts(
     runner: bq.BigQueryRunner, window: Window, dry_run_only: bool = False
 ) -> pd.DataFrame:
@@ -50,18 +113,11 @@ def h1_accounts(
     from . import config
 
     sql = bq.load_sql("h1_accounts")
-    grid = prereg.load()["bot_filter"]["grid"]
-    params_common = {
-        "loosest_days": min(grid["min_active_days"]),
-        "loosest_receivers": min(grid["min_distinct_receivers"]),
-        "loosest_balance": min(grid["min_balance_near"]),
-        "success_status": None,
-    }
 
     frames, total = [], 0
     print(f"Per-account facts over {len(month_windows(window))} monthly windows")
     for month, start, end in month_windows(window):
-        params = {"window_start": start, "window_end": end, **params_common}
+        params = h1_params(start, end)
         name = f"h1_accounts_{month}"
         if dry_run_only:
             cost = runner.dry_run(sql, params, name)
@@ -72,7 +128,7 @@ def h1_accounts(
         # Each month is written before the next query starts, so an
         # interruption costs one month rather than the whole run. Without
         # this, a drop at month eleven re-bills every earlier scan.
-        path = config.RAW_DIR / f"h1_accounts_{month}.parquet"
+        path = h1_month_path(month)
         if path.exists():
             frame = pd.read_parquet(path)
             print(f"  {month}  {len(frame):,} accounts (cached, not re-queried)")
@@ -90,6 +146,8 @@ def h1_accounts(
         return pd.DataFrame()
 
     out = pd.concat(frames, ignore_index=True)
+    # The combined file is what the H4 native leg reads its economic set from.
+    out.to_parquet(h1_combined_path(), index=False)
     print(f"  {len(out):,} account-months in data/cache/raw_full/ (gitignored)")
     return out
 
@@ -166,18 +224,11 @@ def h2_concentration(
     from . import config
 
     sql = bq.load_sql("h2_concentration")
-    d, c, b = prereg.defaults()
     frames, total = [], 0
 
     print(f"H2: concentration over {len(month_windows(window))} monthly windows")
     for month, start, end in month_windows(window):
-        params = {
-            "window_start": start,
-            "window_end": end,
-            "min_active_days": d,
-            "min_distinct_receivers": c,
-            "min_balance_near": b,
-        }
+        params = h2_params(start, end)
         name = f"h2_concentration_{month}"
         if dry_run_only:
             cost = runner.dry_run(sql, params, name)
@@ -185,7 +236,7 @@ def h2_concentration(
             print(f"  {month}  {cost.describe()}")
             continue
 
-        path = config.RAW_DIR / f"h2_{month}.parquet"
+        path = h2_month_path(month)
         if path.exists():
             frame = pd.read_parquet(path)
             print(f"  {month}  cached")
@@ -261,4 +312,18 @@ def h4_native_leg(runner: bq.BigQueryRunner, window: Window) -> pd.DataFrame:
 
     out = pd.DataFrame(rows)
     bq.save_cache("h4_native_leg", out)
+    return out
+
+
+def h5_params(window: Window) -> dict:
+    """H5 is one query over the whole window: about 5 GiB a month."""
+    return {"window_start": window.start, "window_end": window.end}
+
+
+def h5_value_accrual(runner: bq.BigQueryRunner, window: Window) -> pd.DataFrame:
+    """H5a: burn against gross issuance, month by month, read from the chain."""
+    print("H5: burn and issuance over the window")
+    out = runner.run(bq.load_sql("h5_value_accrual"), h5_params(window), name="h5_value_accrual")
+    bq.save_cache("h5_value_accrual", out)
+    print(f"  {len(out)} months")
     return out

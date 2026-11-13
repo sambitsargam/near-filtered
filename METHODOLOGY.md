@@ -193,7 +193,8 @@ number.
 and the dashboard from the committed aggregates in `data/cache/`. **No
 Google Cloud account, no API keys, no network.**
 
-`make refresh` re-pulls live data and needs `.env`.
+`make refresh-plan` prices every query a live refresh would run, for free.
+`make refresh` re-pulls live data after asking, then rebuilds; it needs `.env`.
 
 `make verify` runs the unit tests, the number-drift check and a full rebuild,
 then prints the verdict for each hypothesis.

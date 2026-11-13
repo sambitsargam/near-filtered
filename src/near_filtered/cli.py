@@ -3,6 +3,7 @@
     nf inventory     dataset inventory + the freshness check   (free, needs GCP)
     nf sample-cost   dry-run one real metric query and price it (free, needs GCP)
     nf window        print the window currently in use          (no network)
+    nf refresh       re-pull every series; prices it and asks first (costs money)
 
 Commands that cost money are never the default and always print an estimate
 before they spend anything.
@@ -11,7 +12,6 @@ before they spend anything.
 from __future__ import annotations
 
 import argparse
-import datetime as dt
 import sys
 
 from . import bq, config, inventory
@@ -25,41 +25,43 @@ def cmd_inventory(args) -> int:
 
 
 def cmd_sample_cost(args) -> int:
-    """Price the H1 query over one 30-day window without running it."""
+    """Price the H1 query over the latest 30-day window without running it."""
+    from . import pulls
+
     runner = bq.BigQueryRunner()
     try:
         win = W.load()
-        window_end = win.end
     except FileNotFoundError:
         print("no window.json yet; run `nf inventory` first")
         return 1
 
-    window_start = window_end - dt.timedelta(days=29)
-    sql = bq.load_sql("h1_economic_accounts_grid")
-    params = {
-        "window_start": window_start,
-        "window_end": window_end,
-        "balance_date": window_end,
-        "success_status": args.success_status,
-    }
+    month, start, end = pulls.month_windows(win)[-1]
+    params = pulls.h1_params(start, end)
+    if args.success_status:
+        params["success_status"] = args.success_status
 
-    print("\nSample query: H1 economic accounts, full 3x3x3 threshold grid")
-    print(f"  window        {window_start.isoformat()} .. {window_end.isoformat()} (30 days)")
-    print(f"  balances at   {window_end.isoformat()}")
+    print("\nSample query: H1 per-account facts (feeds all 27 grid cells and H3)")
+    print(f"  window        {start.isoformat()} .. {end.isoformat()} (30 days, {month})")
     print(f"  success filter {args.success_status or 'none (all signed transactions)'}")
-    cost = runner.dry_run(sql, params, name="h1_economic_accounts_grid")
+    cost = runner.dry_run(bq.load_sql("h1_accounts"), params, name=f"h1_accounts_{month}")
     print(f"\n  {cost.describe()}")
     print(f"  per-query ceiling: {config.human_bytes(runner.max_bytes)}")
-
-    monthly = cost.bytes_processed * 12
-    print(
-        f"\n  Extrapolated to 12 monthly windows: "
-        f"{config.human_bytes(monthly)} (~${config.bytes_to_usd(monthly):,.2f})"
-    )
+    print("  For the whole refresh, priced query by query: nf refresh --plan")
     if cost.bytes_processed > runner.max_bytes:
         print("\n  OVER THE CEILING — this query will be refused until the range narrows.")
         return 2
     return 0
+
+
+def cmd_refresh(args) -> int:
+    from . import refresh
+
+    return refresh.run(
+        plan_only=args.plan,
+        assume_yes=args.yes,
+        max_total_gib=args.max_total_gib,
+        skip_intents=args.skip_intents,
+    )
 
 
 def cmd_window(args) -> int:
@@ -90,11 +92,23 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("window", help="print the analysis window in use (no network)")
 
+    p_ref = sub.add_parser("refresh", help="re-pull every series live; prices it and asks first")
+    p_ref.add_argument("--plan", action="store_true", help="dry-run and price only (free)")
+    p_ref.add_argument("--yes", action="store_true", help="do not prompt (for CI)")
+    p_ref.add_argument(
+        "--max-total-gib",
+        type=float,
+        default=1024.0,
+        help="refuse if the whole refresh would scan more than this (default: the 1 TiB free tier)",
+    )
+    p_ref.add_argument("--skip-intents", action="store_true", help="leave the Intents sample as is")
+
     args = parser.parse_args(argv)
     handlers = {
         "inventory": cmd_inventory,
         "sample-cost": cmd_sample_cost,
         "window": cmd_window,
+        "refresh": cmd_refresh,
     }
     try:
         return handlers[args.command](args)

@@ -1,9 +1,15 @@
-# Monthly live refresh - the "living thesis". Needs two repository secrets,
+# Monthly live refresh - the "living thesis". Needs three repository secrets,
 # added by the maintainer, never committed:
 #
-#   GCP_SA_KEY    JSON key for a service account with the BigQuery Job User
-#                 role on the billing project
-#   INTENTS_JWT   partner JWT from https://partners.near-intents.org/
+#   GCP_SA_KEY      JSON key for a service account with the BigQuery Job User
+#                   role on the billing project
+#   GCP_PROJECT_ID  that billing project
+#   INTENTS_JWT     partner JWT from https://partners.near-intents.org/
+#
+# `nf refresh --yes` still dry-runs every query first and refuses the whole
+# run if any query is over MAX_BYTES_BILLED or the total is over
+# --max-total-gib. Closed months are reused from the restored cache rather
+# than re-billed.
 #
 # The refresh re-pulls every series, regenerates metrics and THESIS.md, and
 # opens a pull request rather than pushing to main, so a human sees the new
@@ -16,6 +22,7 @@ on:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 345   # the Intents leg is rate-limited to 1 request / 7.5 s
     permissions:
       contents: write
       pull-requests: write
@@ -28,15 +35,22 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
       - run: make install
+      # Raw per-month pulls are gitignored. Caching them between runs means a
+      # month is billed once, not every month after it too.
+      - uses: actions/cache@v4
+        with:
+          path: |
+            data/cache/raw_full
+            data/cache/intents_raw
+          key: refresh-raw-${{ github.run_id }}
+          restore-keys: refresh-raw-
       - name: refresh
         env:
           INTENTS_JWT: ${{ secrets.INTENTS_JWT }}
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-        run: |
-          uv run nf inventory
-          uv run python -m near_filtered.metrics
-          uv run python -m near_filtered.render
-      - run: make verify
+          MAX_BYTES_BILLED: "75161927680"   # 70 GiB: H5's single scan is ~63 GiB
+        run: uv run nf refresh --yes --max-total-gib 1024
+      - run: make verify   # rebuilds from the refreshed cache, then tests
       - uses: peter-evans/create-pull-request@v6
         with:
           branch: refresh/monthly
