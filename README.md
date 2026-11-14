@@ -20,6 +20,10 @@ checks it.
 — the same `results/metrics.json`, drawn as charts, served as static files
 from `site/`.
 
+**Demo:** [launch post with the video on X](https://x.com/sambitsargam/status/2121595417028931595)
+· **Technical walkthrough:** [video on YouTube](https://youtu.be/yO0XIfxgYvY), on how
+the pipeline makes every number hard to fake.
+
 ## 1. Verdicts
 
 Window **2025-11-01 to 2026-10-31**; dataset current to

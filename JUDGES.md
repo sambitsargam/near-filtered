@@ -69,6 +69,8 @@ figure in THESIS.md and rerun.
 | Sources with reliability labels | `SOURCES.md` |
 | Live refresh + monthly CI | `make refresh-plan` (free), `make refresh`, `src/near_filtered/refresh.py`, `.github/workflows/refresh.yml` |
 | Dashboard | [near-filtered.vercel.app](https://near-filtered.vercel.app) — static files from `site/` |
+| Demo video | [launch post on X](https://x.com/sambitsargam/status/2121595417028931595) |
+| Technical walkthrough | [YouTube](https://youtu.be/yO0XIfxgYvY): architecture, cost guards, the verdict rule, the number-drift check |
 
 ## What to attack first
 
